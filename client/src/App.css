@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200&family=Source+Sans+Pro:wght@200&display=swap');
+* {
+  font-family: 'Ubuntu';
+  font-weight: 300;
+}
+body {
+  background-color: #f8f8f8 !important;
+}
+.search-filters-container {
+  display: flex;
+  justify-content: space-between;
+}
+.filters-container {
+  display: flex;
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dropBtn {
+  background-color: transparent;
+  color: black;
+  border: none;
+  padding: 5px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  color: blue;
+}
+.dropBtn:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.switch {
+  display: block;
+  width: 150px;
+  padding: 1px;
+  text-align: left;
+}
+.switch:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+.dropdown-content a:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+.search {
+  height: 2rem;
+  font-size: 20px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid black;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+.search:focus {
+  outline: none;
+  border-bottom: 1px solid black;
+}
+/* login file */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+/* end login file */
+/* Designing table */
+.table-container {
+  width: 100%;
+  margin: 5px auto;
+  border-bottom: none;
+  overflow-x: auto;
+  background-color: white;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.4);
+}
+table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 25px 0;
+  min-width: 100%;
+}
+table thead tr {
+  text-align: left;
+  font-weight: bold;
+}
+table tbody tr:hover {
+  cursor: pointer;
+}
+.user-name {
+  font-weight: bold;
+}
+table tbody tr td {
+  text-align: left;
+  max-width: 200px;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+}
+table th,
+table td {
+  padding: 3px 4px;
+}
+table th {
+  font-weight: 500;
+}
+table tbody tr,
+table thead tr {
+  border-bottom: 0.1px solid rgba(0, 0, 0, 0.2);
+}
+.purchase-paper {
+  box-shadow: none;
+}
+.purchase-paper tr:nth-child(even) {
+  background-color: #dddddd;
+}
+/* design add-user */
+.add-user-container {
+  width: 53rem;
+  height: 30rem;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+/* Supplier-info file */
+.debt-section {
+  margin-left: 10px;
+  font-weight: bold;
+}
+.debt-amount-container {
+  background-color: white;
+  width: 10rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+/* Add customer file. */
+.add-customer-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 20rem;
+  background-color: white;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+/* edit customer file. */
+.edit-customer-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  height: 25rem;
+  background-color: white;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  z-index: 2;
+  padding: 0 6px;
+}
+
+/* change purchase order file */
+.change-purchase-status-container {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  width: 10rem;
+  height: 5rem;
+  background-color: white;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  z-index: 2;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Report file / home file */
+.report-display-container {
+  width: 100%;
+  height: 26rem;
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  padding: 10px;
+  position: relative;
+  margin-top: 10px;
+}
+.report-display-table-container {
+  height: 19rem;
+  background-color: white;
+  overflow-y: auto;
+}
+
+/* Edit Product */
+.editBtn {
+  border: none;
+  font-size: 14px;
+  color: blue;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.editBtn:active {
+  background-color: rgba(0, 0, 255, 0.125);
+}
+
+.inactive {
+  display: none !important;
+}
