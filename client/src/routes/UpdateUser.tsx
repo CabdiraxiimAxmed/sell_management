@@ -5,10 +5,17 @@ import { TextField, Box, Button, Typography } from '@mui/material';
 import { UserType } from './UserManagement';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import {
+  ConstructionOutlined,
+  TroubleshootRounded,
+  TurnedIn,
+} from '@mui/icons-material';
 
 const UpdateUser: React.FC = () => {
-
   const navigate = useNavigate();
+  const [userPermissions, setUserPermissions] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   const [user, setUser] = useState<UserType>({
     id: 0,
@@ -17,36 +24,45 @@ const UpdateUser: React.FC = () => {
     role: '',
     password: '',
     created_date: '',
-    permissions: [''],
+    permissions: [[{ test: false }]],
     contact: '',
-  })
+  });
   const { username } = useParams();
   useEffect(() => {
-    axios.get(`/user/${username}`)
-         .then(res => {
-           setUser(res.data);
-         }).catch(err => {
-           console.log('error happened');
-         })
+    axios
+      .get(`http://localhost:2312/user/${username}`)
+      .then(res => {
+        setUser(res.data);
+      })
+      .catch(error => {
+        toast.error(error.message);
+      });
+    for (let permission of user.permissions[0]) {
+      setUserPermissions({
+        ...userPermissions,
+        ...permission,
+      });
+    }
   }, []);
 
   const deleteUser = () => {
-    axios.post(`/user/delete/${user.username}`, {})
-         .then(res => {
-           if(res.data === 'success'){
-             toast.success('waa lagu guuleystay');
-             setTimeout(() => {
-               navigate('/user-management');
-             }, 2000);
-           }
-         }).catch(err => {
-           toast.error('qalad ayaa dhacay');
-         })
+    axios
+      .post(`http://localhost:2312/user/delete/${user.username}`, {})
+      .then(res => {
+        if (res.data === 'success') {
+          toast.success('waa lagu guuleystay');
+          setTimeout(() => {
+            navigate('/user-management');
+          }, 2000);
+        }
+      })
+      .catch(error => {
+        toast.error(error.message);
+      });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log(e)
+    e.preventDefault();
     let permissions = [];
     const data = new FormData(e.currentTarget);
     let name = data.get('name');
@@ -58,44 +74,70 @@ const UpdateUser: React.FC = () => {
     let supplier = data.get('supplier');
     let purchaseOrder = data.get('purchase-order');
     let orders = data.get('orders');
-    if (userManagement == 'on'){
-      permissions.push('user-management');
+    if (userManagement == 'on') {
+      permissions.push({ 'user-management': true });
+    } else {
+      permissions.push({ 'user-management': false });
     }
-    if (supplier == 'on'){
-      permissions.push('supplier');
-    }
-    if (purchaseOrder == 'on'){
-      permissions.push('purchase-order');
-    }
-    if (orders == 'on'){
-      permissions.push('orders');
-    }
-    if(!name || !username || !password || !contact || !role) {
+    // if (supplier == 'on') {
+    //   permissions.push({ supplier: true });
+    // } else {
+    //   permissions.push({ supplier: false });
+    // }
+    // if (purchaseOrder == 'on') {
+    //   permissions.push({ 'purchase-order': true });
+    // } else {
+    //   permissions.push({ 'purchase-order': false });
+    // }
+    // if (orders == 'on') {
+    //   permissions.push({ orders: true });
+    // } else {
+    //   permissions.push({ orders: false });
+    // }
+    if (!name || !username || !password || !contact || !role) {
       toast.warn('fadlan buuxi');
       return;
     }
-    if(!name || !username || !password || !contact || !role) {
+    if (!name || !username || !password || !contact || !role) {
       toast.warn('fadlan buuxi');
       return;
     }
-    axios.post('/user/update-user', { id: user.id, name, username, role, contact, password, permissions})
-         .then(res => {
-           if(res.data === 'error') {
-             toast.error('qalada ayaa dhacay');
-           };
-           if(res.data === 'success') {
-             toast.success('waa lagu guuleystay');
-             setTimeout(() => {
-               navigate('/user-management');
-             }, 2000);
-           };
-         })
-         .catch(err => {
-           toast.error('qalada ayaa dhacay');
-         })
-    /* console.log({ name, username, password, role, contact, userManagement}) */
+    axios
+      .post('http://localhost:2312/user/update-user', {
+        id: user.id,
+        name,
+        username,
+        role,
+        contact,
+        password,
+        permissions,
+      })
+      .then(res => {
+        if (res.data === 'error') {
+          toast.error('qalada ayaa dhacay');
+        }
+        if (res.data === 'success') {
+          toast.success('waa lagu guuleystay');
+          setTimeout(() => {
+            navigate('/user-management');
+          }, 2000);
+        }
+      })
+      .catch(error => {
+        toast.error(error.message);
+      });
   };
 
+  const isChecked = (name: string) => {
+    return userPermissions[name];
+  };
+
+  const handleChange = (name: string) => {
+    setUserPermissions({
+      ...userPermissions,
+      [name]: !userPermissions[name],
+    });
+  };
 
   return (
     <div className="add-user-container">
@@ -111,12 +153,18 @@ const UpdateUser: React.FC = () => {
         pauseOnHover
         theme="dark"
       />
-      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }} style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px'}}>
+      <Box
+        component="form"
+        noValidate
+        onSubmit={handleSubmit}
+        sx={{ mt: 1 }}
+        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}
+      >
         <TextField
           required
           id="name"
           multiline
-          defaultValue= {user.name}
+          defaultValue={user.name}
           helperText="Magaca"
           name="name"
         />
@@ -144,7 +192,7 @@ const UpdateUser: React.FC = () => {
           defaultValue={user.role}
           id="outlined-password-input"
           helperText="role"
-          type="name"
+          type="nameuserPermissions['user-management']"
         />
         <TextField
           required
@@ -160,26 +208,28 @@ const UpdateUser: React.FC = () => {
           <Typography variant="h5">Ogolaanshaha</Typography>
           <div className="permissions-button">
             <label className="switch">
-              <input type="checkbox" name="user-management" />
-                <span>cinwaanada</span>
-            </label>
-            <label className="switch">
-              <input type="checkbox" name="supplier" />
-              <span>supplier</span>
-            </label>
-            <label className="switch">
-              <input type="checkbox" name="purchase-order" />
-              <span>alaab dalbasho</span>
-            </label>
-            <label className="switch">
-              <input type="checkbox" name="orders" />
-              <span>dalabkaaga</span>
+              <input
+                type="checkbox"
+                name="user-management"
+                checked={isChecked('user-management')}
+                onChange={() => handleChange('user-management')}
+              />
+              <span>cinwaanada</span>
             </label>
           </div>
         </div>
         <div></div>
-        <Button type="submit" fullWidth variant="contained" >Submit</Button>
-        <Button fullWidth variant="contained" color="error" onClick={deleteUser}>Delete</Button>
+        <Button type="submit" fullWidth variant="contained">
+          Submit
+        </Button>
+        <Button
+          fullWidth
+          variant="contained"
+          color="error"
+          onClick={deleteUser}
+        >
+          Delete
+        </Button>
       </Box>
     </div>
   );

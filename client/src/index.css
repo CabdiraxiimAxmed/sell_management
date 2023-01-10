@@ -11,3 +11,45 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 25px 0;
+  min-width: 100%;
+}
+table thead tr {
+  text-align: left;
+  font-weight: bold;
+}
+table tbody tr:hover {
+  cursor: pointer;
+}
+.user-name {
+  font-weight: bold;
+}
+table tbody tr td {
+  text-align: left;
+  max-width: 200px;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+}
+table th,
+table td {
+  padding: 3px 4px;
+}
+table th {
+  font-weight: 500;
+}
+table tbody tr,
+table thead tr {
+  border-bottom: 0.1px solid rgba(0, 0, 0, 0.2);
+}
+.purchase-paper {
+  box-shadow: none;
+}
+.purchase-paper tr:nth-child(even) {
+  background-color: #dddddd;
+}

@@ -77,7 +77,18 @@ body {
   justify-content: center;
   height: 100vh;
 }
-/* end login file */
+/* header file */
+.user-management-container {
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
 /* Designing table */
 .table-container {
   width: 100%;
@@ -89,48 +100,7 @@ body {
   border-top-right-radius: 5px;
   box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.4);
 }
-table {
-  table-layout: fixed;
-  border-collapse: collapse;
-  margin: 25px 0;
-  min-width: 100%;
-}
-table thead tr {
-  text-align: left;
-  font-weight: bold;
-}
-table tbody tr:hover {
-  cursor: pointer;
-}
-.user-name {
-  font-weight: bold;
-}
-table tbody tr td {
-  text-align: left;
-  max-width: 200px;
-  white-space: -o-pre-wrap;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  white-space: -moz-pre-wrap;
-  white-space: -pre-wrap;
-}
-table th,
-table td {
-  padding: 3px 4px;
-}
-table th {
-  font-weight: 500;
-}
-table tbody tr,
-table thead tr {
-  border-bottom: 0.1px solid rgba(0, 0, 0, 0.2);
-}
-.purchase-paper {
-  box-shadow: none;
-}
-.purchase-paper tr:nth-child(even) {
-  background-color: #dddddd;
-}
+
 /* design add-user */
 .add-user-container {
   width: 53rem;

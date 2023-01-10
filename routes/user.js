@@ -68,10 +68,11 @@ router.get('/:username', async (req, res) => {
 router.post('/create-user', async (req, res) => {
   let { name, username, role, contact, password, permissions } = req.body;
   role = role.toLowerCase();
+  let permissionJson = JSON.stringify(permissions);
   let hash = CryptoJS.AES.encrypt(password, 'ahmed').toString();
   try {
-    let resp = await client.query(
-      `INSERT INTO user_info (name, username, role, contact, permissions, password, created_date) VALUES('${name}', '${username}', '${role}', '${contact}', '{"${permissions}"}', '${hash}', DEFAULT)`
+    await client.query(
+      `INSERT INTO user_info (name, username, role, contact, permissions, password, created_date) VALUES('${name}', '${username}', '${role}', '${contact}', array['${permissionJson}']::json[], '${hash}', DEFAULT)`
     );
     res.send('success');
   } catch (err) {
@@ -81,12 +82,12 @@ router.post('/create-user', async (req, res) => {
 
 router.post('/update-user', async (req, res) => {
   let { id, name, username, role, contact, password, permissions } = req.body;
-  console.log({ permissions });
   role = role.toLowerCase();
+  let permissionJson = JSON.stringify(permissions);
   let hash = CryptoJS.AES.encrypt(password, 'ahmed').toString();
   try {
     const resp = await client.query(
-      `UPDATE user_info SET name='${name}', username='${username}', role='${role}', contact='${contact}', password='${hash}', permissions=array['${permissions}']::varchar[] WHERE id='${id}'`
+      `UPDATE user_info SET name='${name}', username='${username}', role='${role}', contact='${contact}', password='${hash}', permissions=array['${permissionJson}']::json[] WHERE id='${id}'`
     );
     res.send('success');
   } catch (err) {
