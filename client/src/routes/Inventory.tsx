@@ -1,80 +1,163 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import AddProduct from '../components/AddProduct';
 import EditProduct from '../components/EditProduct';
-import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
-import { Stack, Typography, Button } from '@mui/material';
-
-/**
- * ! Remove all add product code.
- */
+import {
+  Stack,
+  Typography,
+  Button,
+  Paper,
+  Table,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableBody,
+  TableRow,
+} from '@mui/material';
 
 export type ProductType = {
   id: number;
   name: string;
-  supplier: string;
-  quantity: number;
-  alertquantity: number;
-  barcode: string;
-  price: string;
+  units: number;
+  category: string;
+  sub_category: string;
+  alert_quantity: number;
+  purchase_cost: number;
+  sale_price: number;
+  min_sale_price: number;
+  min_quantity_order: number;
+  bar_code: string;
+  created_date: string;
 };
-type ColumnDisplayType = {
-  id: boolean;
-  name: boolean;
-  supplier: boolean;
-  quantity: boolean;
-  alertquantity: boolean;
-  barcode: boolean;
-  price: boolean;
-};
+
+interface Columns {
+  id:
+    | 'id'
+    | 'name'
+    | 'units'
+    | 'category'
+    | 'sub_category'
+    | 'alert_quantity'
+    | 'purchase_cost'
+    | 'sale_price'
+    | 'min_sale_price'
+    | 'min_quantity_order'
+    | 'bar_code'
+    | 'created_date';
+  label: string;
+  minWidth?: number;
+  align?: 'right';
+  format?: (value: number) => string;
+}
+
 const Products: React.FC = () => {
   const navigate = useNavigate();
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [addProduct, setAddProduct] = useState<boolean>(false);
   const [editProduct, setEditProduct] = useState<boolean>(false);
   const [productToEdit, setProductToEdit] = useState<ProductType>({
     id: 0,
     name: '',
-    supplier: '',
-    quantity: 0,
-    alertquantity: 0,
-    barcode: '',
-    price: '',
+    units: 0,
+    category: '',
+    sub_category: '',
+    alert_quantity: 0,
+    purchase_cost: 0,
+    sale_price: 0,
+    min_sale_price: 0,
+    min_quantity_order: 0,
+    bar_code: '',
+    created_date: '',
   });
   const [products, setProducts] = useState<ProductType[]>([
     {
       id: 0,
       name: '',
-      supplier: '',
-      quantity: 0,
-      alertquantity: 0,
-      barcode: '',
-      price: '',
+      units: 0,
+      category: '',
+      sub_category: '',
+      alert_quantity: 0,
+      purchase_cost: 0,
+      sale_price: 0,
+      min_sale_price: 0,
+      min_quantity_order: 0,
+      bar_code: '',
+      created_date: '',
     },
   ]);
   const [productsStore, setProductsStore] = useState<ProductType[]>([
     {
       id: 0,
       name: '',
-      supplier: '',
-      quantity: 0,
-      alertquantity: 0,
-      barcode: '',
-      price: '',
+      units: 0,
+      category: '',
+      sub_category: '',
+      alert_quantity: 0,
+      purchase_cost: 0,
+      sale_price: 0,
+      min_sale_price: 0,
+      min_quantity_order: 0,
+      bar_code: '',
+      created_date: '',
     },
   ]);
-  const [columnDisplay, setColumnDisplay] = useState<ColumnDisplayType>({
-    id: true,
-    name: true,
-    supplier: true,
-    quantity: true,
-    alertquantity: true,
-    barcode: true,
-    price: true,
-  });
+
+  const columns: readonly Columns[] = [
+    { id: 'id', label: 'id', minWidth: 100, align: 'right' },
+    { id: 'name', label: 'Name', minWidth: 170 },
+    {
+      id: 'units',
+      label: 'units',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => value.toLocaleString('en-US'),
+    },
+    { id: 'category', label: 'Category', minWidth: 170 },
+    { id: 'sub_category', label: 'Sub Category', minWidth: 170 },
+    {
+      id: 'alert_quantity',
+      label: 'Alert Quantity',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => value.toLocaleString('en-US'),
+    },
+    {
+      id: 'purchase_cost',
+      label: 'Purchase Cost',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => value.toLocaleString('en-US'),
+    },
+    {
+      id: 'sale_price',
+      label: 'Sale Price',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => value.toLocaleString('en-US'),
+    },
+    {
+      id: 'min_sale_price',
+      label: 'Min Sale Price',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => value.toLocaleString('en-US'),
+    },
+    {
+      id: 'min_quantity_order',
+      label: 'Min Quantity Order',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => value.toLocaleString('en-US'),
+    },
+    { id: 'bar_code', label: 'Bar Code', minWidth: 170 },
+    { id: 'created_date', label: 'Created Date', minWidth: 170 },
+  ];
+
   useEffect(() => {
     axios
       .get('http://localhost:2312/products')
@@ -87,14 +170,6 @@ const Products: React.FC = () => {
       });
   }, []);
 
-  const handleClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // change function name
-    setColumnDisplay({
-      ...columnDisplay,
-      [e.target.name]: e.target.checked,
-    });
-  };
-
   const filterUser = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     const filtered = productsStore.filter((product: ProductType) => {
@@ -105,20 +180,21 @@ const Products: React.FC = () => {
         {
           id: 0,
           name: '',
-          supplier: '',
-          quantity: 0,
-          alertquantity: 0,
-          barcode: '',
-          price: '',
+          units: 0,
+          category: '',
+          sub_category: '',
+          alert_quantity: 0,
+          purchase_cost: 0,
+          sale_price: 0,
+          min_sale_price: 0,
+          min_quantity_order: 0,
+          bar_code: '',
+          created_date: '',
         },
       ]);
       return;
     }
     setProducts(filtered);
-  };
-
-  const display = (column_head: string) => {
-    return columnDisplay[column_head as keyof ColumnDisplayType];
   };
 
   const handleEditProduct = (id: number) => {
@@ -128,6 +204,17 @@ const Products: React.FC = () => {
     if (!foundProduct.name) return;
     setProductToEdit(foundProduct);
     setEditProduct(!editProduct);
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
   };
 
   return (
@@ -172,85 +259,66 @@ const Products: React.FC = () => {
             className="search"
             onChange={filterUser}
           />
-          <div className="filters-container">
-            <div className="dropdown">
-              <button className="dropBtn">
-                <ViewWeekIcon /> columns
-              </button>
-              <div className="dropdown-content">
-                {Object.keys(products[0]).map(
-                  (column_head: string, index: number) => (
-                    <label key={index} className="switch">
-                      <input
-                        type="checkbox"
-                        name={column_head}
-                        className="checkbox"
-                        onChange={handleClick}
-                        checked={
-                          columnDisplay[column_head as keyof ColumnDisplayType]
-                        }
-                      />
-                      <span>{column_head}</span>
-                    </label>
-                  )
-                )}
-              </div>
-            </div>
-            <button className="dropBtn">
-              <DownloadIcon /> export
-            </button>
-          </div>
         </div>
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                {Object.keys(products[0]).map((column_head, index) => (
-                  <th
-                    key={index}
-                    className={display(column_head) ? '' : 'inactive'}
-                  >
-                    {column_head}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            {products.map((product: ProductType, index: number) => (
-              <tbody key={index}>
-                <tr>
-                  <td className={display('id') ? '' : 'inactive'}>
-                    {product.id}
-                  </td>
-                  <td className="user-name">{product.name}</td>
-                  <td className={display('supplier') ? '' : 'inactive'}>
-                    {product.supplier}
-                  </td>
-                  <td className={display('quantity') ? '' : 'inactive'}>
-                    {product.quantity}
-                  </td>
-                  <td className={display('alertquantity') ? '' : 'inactive'}>
-                    {product.alertquantity}
-                  </td>
-                  <td className={display('barcode') ? '' : 'inactive'}>
-                    {product.barcode}
-                  </td>
-                  <td className={display('price') ? '' : 'inactive'}>
-                    {product.price}
-                  </td>
-                  <td>
-                    <button
-                      className="editBtn"
-                      onClick={() => handleEditProduct(product.id)}
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100]}
+          component="div"
+          count={products.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+        <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
+          <TableContainer
+            sx={{ minHeight: 440, transform: 'translateY(-30px)' }}
+          >
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  {columns.map(column => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{
+                        minWidth: column.minWidth,
+                        backgroundColor: 'black',
+                        color: 'white',
+                        fontWeight: 'bold',
+                      }}
                     >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            ))}
-          </table>
-        </div>
+                      {column.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {products
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row: ProductType, index: number) => (
+                    <TableRow
+                      style={{ padding: 0 }}
+                      hover
+                      role="checkbox"
+                      tabIndex={-1}
+                      key={index}
+                    >
+                      {columns.map((column: Columns, index: number) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell key={index} align={column.align}>
+                            {column.format && typeof value === 'number'
+                              ? column.format(value)
+                              : value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       </div>
     </>
   );
