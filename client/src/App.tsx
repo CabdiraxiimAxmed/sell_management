@@ -7,6 +7,7 @@ import PurchaseEdit from './routes/PurchaseEdit';
 import PurchasePaper from './routes/PurchasePaper';
 import SellPaper from './routes/SellPaper';
 import Inventory from './routes/Inventory';
+import AddProduct from './routes/AddProduct';
 import SellsList from './routes/SellList';
 import Customer from './routes/Customer';
 import Header from './routes/Header';
@@ -37,8 +38,12 @@ function App() {
             element={<Header children={<Supplier />} />}
           />
           <Route
-            path="/inventory"
+            path="/products"
             element={<Header children={<Inventory />} />}
+          />
+          <Route
+            path="/products/add-product"
+            element={<Header children={<AddProduct />} />}
           />
 
           <Route

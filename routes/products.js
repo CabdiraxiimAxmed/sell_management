@@ -59,14 +59,25 @@ router.post('/update', async (req, res) => {
 });
 
 router.post('/create', async (req, res) => {
-  const { name, quantity, alertquantity, price } = req.body;
+  const {
+    name,
+    units,
+    category,
+    subCategory,
+    alertQuantity,
+    barType,
+    purchaseCost,
+    salePrice,
+    minSalePrice,
+    minQntyOrder,
+  } = req.body;
   try {
-    let resp = await client.query(
-      `INSERT INTO products (name, quantity, alertquantity, price) VALUES('${name}', '${quantity}','${alertquantity}', '${price}')`
+    await client.query(
+      `INSERT INTO products ( name, units, category, sub_category, alert_quantity, bar_code, purchase_cost, sale_price, min_sale_price, min_quantity_order ) VALUES('${name}', '${units}','${category}', '${subCategory}', '${alertQuantity}', '${barType}', '${purchaseCost}', '${salePrice}', '${minSalePrice}', '${minQntyOrder}')`
     );
     res.send('success');
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.send('error');
   }
 });

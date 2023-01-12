@@ -375,7 +375,7 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
             disablePadding
             sx={{ display: 'block' }}
             component={Link}
-            to="/inventory"
+            to="/products"
             className={gotPermission('inventory') ? '' : 'inactive'}
           >
             <ListItemButton

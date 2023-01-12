@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import EditIcon from '@mui/icons-material/Edit';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import AddProduct from '../components/AddProduct';
 import EditProduct from '../components/EditProduct';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
-import { Box, Stack, Typography, Button } from '@mui/material';
-import { ProductionQuantityLimits } from '@mui/icons-material';
+import { Stack, Typography, Button } from '@mui/material';
+
+/**
+ * ! Remove all add product code.
+ */
 
 export type ProductType = {
   id: number;
@@ -75,13 +77,13 @@ const Products: React.FC = () => {
   });
   useEffect(() => {
     axios
-      .get('/products')
+      .get('http://localhost:2312/products')
       .then(res => {
         setProducts(res.data);
         setProductsStore(res.data);
       })
-      .catch(err => {
-        toast.error('qalad ayaa dhacay');
+      .catch(error => {
+        toast.error(error.message);
       });
   }, []);
 
@@ -156,7 +158,7 @@ const Products: React.FC = () => {
         </Typography>
         <Button
           variant="contained"
-          onClick={() => setAddProduct(!addProduct)}
+          onClick={() => navigate('/products/add-product')}
           startIcon={<AddIcon />}
           style={{ backgroundColor: '#2367d1', fontWeight: 'bold' }}
         >
@@ -178,7 +180,7 @@ const Products: React.FC = () => {
               <div className="dropdown-content">
                 {Object.keys(products[0]).map(
                   (column_head: string, index: number) => (
-                    <label className="switch">
+                    <label key={index} className="switch">
                       <input
                         type="checkbox"
                         name={column_head}
@@ -204,7 +206,10 @@ const Products: React.FC = () => {
             <thead>
               <tr>
                 {Object.keys(products[0]).map((column_head, index) => (
-                  <th className={display(column_head) ? '' : 'inactive'}>
+                  <th
+                    key={index}
+                    className={display(column_head) ? '' : 'inactive'}
+                  >
                     {column_head}
                   </th>
                 ))}
