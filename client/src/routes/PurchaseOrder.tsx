@@ -1,115 +1,218 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Divider, TextField, Typography, Box, IconButton, Button, Autocomplete } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
-import { ToastContainer, toast } from 'react-toastify';
-import CloseIcon from '@mui/icons-material/Close';
-import axios from 'axios';
+import {
+  Grid,
+  TextField,
+  Box,
+  Button,
+  Autocomplete,
+  Paper,
+  Table,
+  TableBody,
+  TableContainer,
+  TableCell,
+  TableHead,
+  TableRow,
+  IconButton,
+  getTableSortLabelUtilityClass,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ClearIcon from '@mui/icons-material/Clear';
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import axios from 'axios';
 
 type ProductNamesType = {
-  label: string,
+  label: string;
+};
+type PurchasedItemType = {
+  id: number;
+  name: string;
+  unist: string;
+  alert_quantity: string;
+  purchase_cost: string;
+  sale_price: string;
+  min_sale_price: string;
+  min_quantity_order: string;
 };
 const PurchaseOrder: React.FC = () => {
   const navigate = useNavigate();
-  const [displayTax, setDisplayTax] = useState<boolean>(false);
-  const [tax, setTax] = useState<number>(0);
-  const [displayDiscount, setDisplayDiscount] = useState<boolean>(false);
-  const [discount, setDiscount] = useState<number>(0);
+  const [wholeDiscount, setWholeDiscount] = useState<number>(0);
+  const [quantity, setQuantity] = useState<{ [key: number]: number }>({});
+  const [itemDiscount, setItemDiscount] = useState<{ [key: number]: number }>(
+    {}
+  );
   const [valueHolders, setValueHolders] = useState<any>({});
-  const [productNames, setProductNames] = useState<ProductNamesType[]>([{label: ''}]);
-  const [supplierNames, setSupplierNames] = useState<ProductNamesType[]>([{label: ''}]);
+  const [itemTerm, setItemTerm] = useState<string>('');
+  const [purchasedItems, setPurchasedItems] = useState<PurchasedItemType[]>([
+    {
+      id: 0,
+      name: '',
+      unist: '',
+      alert_quantity: '',
+      purchase_cost: '',
+      sale_price: '',
+      min_sale_price: '',
+      min_quantity_order: '',
+    },
+  ]);
+  const [supplierNames, setSupplierNames] = useState<ProductNamesType[]>([
+    { label: '' },
+  ]);
   const [count, setCount] = useState<number>(0);
 
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    let name = e.target.name
-    let value: number = parseFloat(e.target.value);
-    setValueHolders({
-      ...valueHolders,
-      [name]: value,
-    });
-  };
-
   useEffect(() => {
-    axios.get('/products/products-name')
-         .then(res => {
-           setProductNames(res.data);
-         })
-         .catch(err => {
-           console.log('error happened');
-         })
-    axios.get('/supplier/supplier-name')
-         .then(res => {
-           setSupplierNames(res.data);
-         })
-         .catch(err => {
-           console.log('error happened');
-         })
+    axios
+      .get('http://localhost:2312/supplier/supplier-name')
+      .then(res => {
+        setSupplierNames(res.data);
+      })
+      .catch(error => {
+        toast.error(error.message);
+      });
   }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const supplier = data.get('supplier');
-    const status = data.get('order-status')
-    const orderDate = data.get('order-date')
-    const deliveryDate = data.get('delivery-date')
-    if(!supplier || !status || !orderDate || !deliveryDate) {
-      toast.warn('fadlan xogta dhamestir');
+    const ref = data.get('reference-no');
+    const purchaseDate = data.get('purchase-date');
+    const purchase_status = data.get('purchase-status');
+    const businessLocation = data.get('business-location');
+    let items = [];
+    for (let item of purchasedItems) {
+      if (!item.name) continue;
+      let discount = itemDiscount[item.id];
+      let itemQuantity = quantity[item.id];
+      if (!item.name) continue;
+      if (!discount) {
+        discount = 0;
+      }
+      if (!itemQuantity) {
+        itemQuantity = 1;
+      }
+      let result = {
+        name: item.name,
+        itemQuantity: itemQuantity,
+        sale_price: item.sale_price,
+        min_sale_price: item.min_sale_price,
+        selling_price: itemQuantity * parseFloat(item.sale_price) - discount,
+        discount,
+      };
+      items.push(result);
+    }
+    let finalData = {
+      supplier,
+      ref,
+      purchaseDate,
+      purchase_status,
+      businessLocation,
+      items,
+      wholeDiscount,
+      total: getTotal(),
+    };
+    axios
+      .post('http://localhost:2312/purchase/purchase-order/', finalData)
+      .then(resp => {
+        if (resp.data === 'success') {
+          toast.success('success');
+          setTimeout(() => {
+            navigate('/orders');
+          }, 2000);
+        } else if (resp.data === 'error') {
+          toast.error('server error');
+        }
+      })
+      .catch(error => {
+        toast.error(error.message);
+      });
+  };
+
+  const purchaseStatus = [
+    { label: 'received' },
+    { label: 'pending' },
+    { label: 'ordered' },
+  ];
+
+  const handlePurchaseQuantityChange = (
+    id: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let value = parseFloat(event.target.value);
+    if (!value || Number.isNaN(value)) {
+      setQuantity({ ...quantity, [id]: 1 });
       return;
     }
-    let count = Object.keys(valueHolders).length / 2;
-    let items = [];
-    for(let i = 0; i < count - 1; i++) {
-      let itemQuantity = valueHolders[`quantity${i}`];
-      let itemPrice = valueHolders[`price${i}`];
-      let amount = Math.round((itemQuantity * itemPrice) * 100) / 100;
-      if(!data.get(`item${i}`) || !data.get(`quantity${i}`) || !data.get(`price${i}`)){
-        toast.warn('fadlan dhameystir xogta');
-        return;
+    setQuantity({ ...quantity, [id]: value });
+  };
+
+  const handlePurchaseDiscountChange = (
+    id: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let value = parseFloat(event.target.value);
+    if (!value || Number.isNaN(value)) {
+      setItemDiscount({ ...quantity, [id]: 0 });
+      return;
+    }
+    setItemDiscount({ ...quantity, [id]: value });
+  };
+
+  const getItem = () => {
+    if (!itemTerm) {
+      toast.error('write item name');
+      return;
+    }
+    axios
+      .post('http://localhost:2312/products/item', { term: itemTerm })
+      .then(resp => {
+        let existedItem = purchasedItems.filter(item => item.name === itemTerm);
+        if (existedItem.length >= 1) {
+          toast.warn('item exist');
+          return;
+        }
+        setPurchasedItems([...purchasedItems, ...resp.data]);
+      })
+      .catch(error => {
+        toast.error(error.message);
+      });
+  };
+
+  const removeItem = (id: number, index: number) => {
+    setPurchasedItems(purchasedItems.filter(item => item.id !== id));
+    let newQuantity = { ...quantity };
+    delete newQuantity[id];
+    setQuantity(prevState => newQuantity);
+    let newDiscount = { ...itemDiscount };
+    delete newDiscount[id];
+    setItemDiscount(prevState => newDiscount);
+  };
+  const handleWholeDiscountChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let value: number = parseFloat(event.target.value);
+    if (!value) value = 0;
+    setWholeDiscount(value);
+  };
+
+  const getTotal = () => {
+    let total: number = 0;
+    for (let item of purchasedItems) {
+      let discount = itemDiscount[item.id];
+      let itemQuantity = quantity[item.id];
+      if (!item.name) continue;
+      if (!discount) {
+        discount = 0;
       }
-      let item = {"item": data.get(`item${i}`), "quantity": itemQuantity, "price": itemPrice, amount}
-      items.push(item);
+      if (!itemQuantity) {
+        itemQuantity = 1;
+      }
+      total += parseFloat(item.sale_price) * itemQuantity - discount;
     }
+    return total - wholeDiscount;
+  };
 
-    let taxAmount = getSubTotalAndAllTotal(valueHolders, tax, discount).taxAmount;
-    let total = getSubTotalAndAllTotal(valueHolders, tax, discount).total;
-
-    axios.post('/purchase/purchase-order', {supplier, status, orderDate, deliveryDate, items, discount, taxAmount, total})
-         .then(res => {
-           if(res.data == 'success') {
-             toast.success('waa lagu guuleystay');
-             setTimeout(() => {
-               navigate('/orders');
-             }, 2000);
-           } else if (res.data == 'err') {
-             toast.error('server: qalad ayaa dhacay');
-           }
-         }).catch(err => {
-           toast.error('qalad ayaa dhacay');
-         })
-  };
-  const getAmount = (quantity: string, price: string) => {
-    let itemQuantity = valueHolders[quantity];
-    let itemPrice = valueHolders[price];
-    let amount: number = 0.00;
-    if(!itemQuantity || !itemPrice) {
-      return amount;
-    }
-    amount = Math.round((itemQuantity * itemPrice) * 100) / 100;
-    return amount;
-  };
-  const removeValueHolders = (quantity: string, price: string) => {
-    let data = valueHolders;
-    delete data[quantity];
-    delete data[price];
-    setValueHolders(data)
-  };
-  let subTotal = getSubTotalAndAllTotal(valueHolders, tax, discount).subTotal;
-  let taxAmount = getSubTotalAndAllTotal(valueHolders, tax, discount).taxAmount;
-  let total = getSubTotalAndAllTotal(valueHolders, tax, discount).total;
-  let orderState = [{label: 'ladalbay'}, {label: 'lahelay'}]
   return (
     <Box component="form" noValidate onSubmit={handleSubmit}>
       <ToastContainer
@@ -124,232 +227,212 @@ const PurchaseOrder: React.FC = () => {
         pauseOnHover
         theme="dark"
       />
-      <Grid container rowSpacing={1} columnSpacing ={2} style={{backgroundColor: 'white', borderRadius: '10px'}}>
-        {/* Purchase details */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle1">xogta dalabka</Typography>
-        </Grid>
-        <Grid item xs={3}>
-          <Autocomplete
-            disablePortal
-            id="combo-box-demo"
-            isOptionEqualToValue={(option, value) => option.label === value.label}
-            options={supplierNames}
-            sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="companyka alaabta" name="supplier" size="small" />}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <Autocomplete
-            disablePortal
-            id="combo-box-demo"
-            isOptionEqualToValue={(option, value) => option.label === value.label}
-            options={orderState}
-            sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="xaalada dalabka" name="order-status" size="small" />}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <TextField
-            id="name"
-            required
-            size="small"
-            helperText="waqtiga dalabka"
-            type="date"
-            name="order-date"
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <TextField
-            id="name"
-            required
-            size="small"
-            helperText="waqtiga imaanshaha"
-            type="date"
-            name="delivery-date"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 0) }
-          />
-        </Grid>
-        {/* Items to order */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle1">alaab aad dalbaneyso</Typography>
-        </Grid>
-        <Grid item xs={3}>
-          <Autocomplete
-            disablePortal
-            id="combo-box-demo"
-            isOptionEqualToValue={(option, value) => option.label === value.label}
-            options={productNames}
-            sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="alaabta" name="item0" size="small" />}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <TextField
-            id="name"
-            required
-            size="small"
-            label="Cadadka"
-            type="number"
-            name="quantity0"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 0) }
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <TextField
-            id="name"
-            required
-            size="small"
-            label="price $"
-            type="number"
-            name="price0"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 0) }
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <Box sx={{display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection:'column'}}>
-            <Typography variant="body2">qiimamaha</Typography>
-            <Typography variant="h6">${getAmount('quantity0', 'price0')}</Typography>
-          </Box>
-        </Grid>
-        {Array.from(Array(count)).map((num, index) => (
-          <Grid key={index} item container xs={12} spacing={4}>
-            <Grid item xs={3}>
-              <Autocomplete
-                disablePortal
-                id="combo-box-demo"
-                isOptionEqualToValue={(option, value) => option.label === value.label}
-                options={productNames}
-                sx={{ width: 300 }}
-                renderInput={(params) => <TextField {...params} label="alaabta" name={`item${index+1}`} size="small" />}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <TextField
-                id="name"
-                required
-                size="small"
-                label="Cadadka"
-                type="number"
-                name={`quantity${index+1}`}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 1) }
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <TextField
-                id="name"
-                required
-                size="small"
-                label="price $"
-                type="number"
-                name={`price${index+1}`}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 1) }
-              />
-            </Grid>
-            <Grid item xs={1}>
-              <Box sx={{display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection:'column'}}>
-                <Typography variant="body2">qiimamaha</Typography>
-                <Typography variant="h6">${getAmount(`quantity${index+1}`, `price${index+1}`)}</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={1}>
-              <Box sx={{display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection:'column'}}>
-                <IconButton color="warning" onClick={() => {
-                  removeValueHolders(`quantity${index+1}`, `price${index+1}`)
-                  setCount(count - 1)
-                }}>
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-            </Grid>
+      <h1 style={{ transform: 'translateY(-10px)' }}>Purchase Order</h1>
+      <Paper style={{ transform: 'translateY(-20px)' }} elevation={10}>
+        <Grid style={{ padding: 10 }} container columnSpacing={1}>
+          <Grid item xs={4}>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              supplier: *
+            </p>
+            <Autocomplete
+              disablePortal
+              id="combo-box-demo"
+              isOptionEqualToValue={(option, value) =>
+                option.label === value.label
+              }
+              options={supplierNames}
+              sx={{ width: 300 }}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  name="supplier"
+                  label="Please Select"
+                  size="small"
+                />
+              )}
+            />
           </Grid>
-        ))}
-        <Grid item xs={3} style={{paddingTop:'0'}}>
-          <IconButton color="primary" onClick={() => setCount(count+1) }>
-            <AddIcon />
-          </IconButton>
+          <Grid item xs={4}>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Reference No: *
+            </p>
+            <TextField
+              fullWidth
+              required
+              name="reference-no"
+              label="Reference No"
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Purchase Date: *
+            </p>
+            <TextField
+              fullWidth
+              required
+              name="purchase-date"
+              size="small"
+              type="date"
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Purchase Status *
+            </p>
+            <Autocomplete
+              disablePortal
+              id="combo-box-demo"
+              isOptionEqualToValue={(option, value) =>
+                option.label === value.label
+              }
+              options={purchaseStatus}
+              sx={{ width: 300 }}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  name="purchase-status"
+                  label="Please Select"
+                  size="small"
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Business Location *
+            </p>
+            <TextField
+              fullWidth
+              required
+              name="business-location"
+              label="business location"
+              size="small"
+            />
+          </Grid>
         </Grid>
-      <Divider/>
-        <Grid item xs={3}>
-          <Box sx={{border: '1px dashed grey'}}>
-            <Grid container rowSpacing={2}>
-              <Grid item xs={6}>
-                <Typography variant="body1">wadarHore</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body1" style={{textAlign: 'end'}}>${subTotal}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body1">canshuurta({tax}%)</Typography>
-              </Grid>
-              <Grid item xs={3}>
-                <Button color="secondary" style={{marginLeft: '17px'}} onClick={() => setDisplayTax(!displayTax) }>badal</Button>
-              </Grid>
-              <Grid item xs={3}>
-                <Typography variant="body1" style={{textAlign: 'end'}}>${taxAmount}</Typography>
-              </Grid>
-              <Grid item xs={12} className={displayTax? '': 'inactive'}>
-                <TextField label="%" variant="filled" type="number" size="small" onChange={(e) => {
-                  if(!e.target.value){
-                    setTax(0);
-                    return
-                  }
-                  setTax(parseFloat(e.target.value))
-                } } />
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body1">discount({discount}$)</Typography>
-              </Grid>
-              <Grid item xs={3}>
-                <Button color="secondary" style={{marginLeft: '17px'}} onClick={() => setDisplayDiscount(!displayDiscount) }>badal</Button>
-              </Grid>
-              <Grid item xs={3}>
-                <Typography variant="body1" style={{textAlign: 'end'}}>${discount}</Typography>
-              </Grid>
-              <Grid item xs={12} className={displayDiscount? '': 'inactive'}>
-                <TextField label="$" variant="filled" type="number" size="small" onChange={(e) => {
-                  if(!e.target.value){
-                    setDiscount(0);
-                    return
-                  }
-                  setDiscount(parseFloat(e.target.value))
-                } } />
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body1">Wadarta guud</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body1" style={{textAlign: 'end'}}>${total}</Typography>
-              </Grid>
-            </Grid>
-          </Box>
+      </Paper>
+
+      <Paper style={{ marginTop: '20px' }} elevation={10}>
+        <Grid container spacing={2}>
+          <Grid item xs={4}></Grid>
+          <Grid item xs={4}>
+            <TextField
+              fullWidth
+              required
+              name="product-name"
+              onChange={e => setItemTerm(e.target.value)}
+              label="product name"
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Button onClick={getItem} variant="text" startIcon={<AddIcon />}>
+              add new product
+            </Button>
+          </Grid>
+          <Grid item xs={2}></Grid>
+          <Grid item xs={8}>
+            <TableContainer sx={{ maxWidth: 950 }} component={Paper}>
+              <Table sx={{ maxWidth: 50 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow className="table-header-row">
+                    <TableCell className="table-header-columns">#</TableCell>
+                    <TableCell className="table-header-columns">Name</TableCell>
+                    <TableCell className="table-header-columns">
+                      Purchase Quantity
+                    </TableCell>
+                    <TableCell className="table-header-columns">
+                      Discount
+                    </TableCell>
+                    <TableCell className="table-header-columns">
+                      Total sale
+                    </TableCell>
+                    <TableCell className="table-header-columns">
+                      <DeleteIcon />
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {purchasedItems
+                    .slice(1)
+                    .map((item: PurchasedItemType, index: number) => (
+                      <TableRow key={item.id}>
+                        <TableCell component="th" scope="row">
+                          {item.id}
+                        </TableCell>
+                        <TableCell align="left">{item.name}</TableCell>
+                        <TableCell align="left">
+                          <input
+                            className="purchase-order-input"
+                            defaultValue="1"
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) => handlePurchaseQuantityChange(item.id, e)}
+                          />
+                        </TableCell>
+                        <TableCell align="left">
+                          <input
+                            className="purchase-order-input"
+                            defaultValue="0"
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) => handlePurchaseDiscountChange(item.id, e)}
+                          />
+                        </TableCell>
+                        <TableCell align="left">
+                          {getItemSalePrice(
+                            item.sale_price,
+                            quantity[item.id],
+                            itemDiscount[item.id]
+                          )}
+                          $
+                        </TableCell>
+                        <TableCell align="left">
+                          <IconButton
+                            onClick={() => removeItem(item.id, index)}
+                            color="primary"
+                          >
+                            <ClearIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+          <Grid item xs={5}></Grid>
+          <Grid item xs={4}>
+            <TextField
+              onChange={handleWholeDiscountChange}
+              size="small"
+              label="all item discount"
+            />
+          </Grid>
+          <Grid item xs={2}>
+            <p style={{ fontWeight: 'bold' }}>Total: {getTotal()} $</p>
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <Button type="submit" variant="contained" fullWidth>
-            <Typography variant="h5">dalbo</Typography>
+        <Grid item xs={4}>
+          <Button type="submit" fullWidth variant="contained">
+            submit
           </Button>
         </Grid>
-      </Grid>
+      </Paper>
     </Box>
   );
 };
 
-
-const getSubTotalAndAllTotal = (valueHolders:any, tax: number, discount: number) => {
-  let subTotal = 0;
-  let taxAmount = 0;
-  let total = 0;
-  let count = Object.keys(valueHolders).length/2
-  for(let i = 0; i < count; i++) {
-    let priceName = `price${i}`
-    let quantityName = `quantity${i}`
-    if(!valueHolders[priceName] || !valueHolders[quantityName]) continue;
-    subTotal += Math.round((valueHolders[priceName] * valueHolders[quantityName]) * 100) / 100;
-  }
-  taxAmount = Math.round(((tax / 100) * subTotal) * 100) / 100;
-  total = Math.round((taxAmount + subTotal -discount) * 100) / 100;
-
-  return {subTotal, taxAmount, total};
-}
+const getItemSalePrice = (
+  price: string,
+  quantity: number,
+  discount: number
+) => {
+  let priceInt = parseFloat(price);
+  if (!quantity) quantity = 1;
+  if (!discount) discount = 0;
+  return priceInt * quantity - discount;
+};
 
 export default PurchaseOrder;

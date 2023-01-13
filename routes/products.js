@@ -58,6 +58,19 @@ router.post('/update', async (req, res) => {
   }
 });
 
+router.post('/item', async (req, res) => {
+  let { term } = req.body;
+  try {
+    let item = await client.query(
+      `SELECT id, name, units, alert_quantity, purchase_cost, sale_price, min_sale_price, min_quantity_order FROM products WHERE name='${term}'`
+    );
+    res.send(item.rows);
+  } catch (err) {
+    console.log(err);
+    res.send('error');
+  }
+});
+
 router.post('/create', async (req, res) => {
   const {
     name,

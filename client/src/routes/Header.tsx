@@ -254,7 +254,7 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
                 <ShoppingCartIcon color="secondary" />
               </ListItemIcon>
               <ListItemText
-                primary={'alaab dalbo'}
+                primary={'purchase order'}
                 sx={{ opacity: open ? 1 : 0 }}
               />
             </ListItemButton>

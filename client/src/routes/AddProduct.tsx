@@ -65,7 +65,9 @@ const AddProduct: React.FC = () => {
       <Paper elevation={10}>
         <Grid style={{ padding: 10 }} container columnSpacing={1}>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}>Product name *</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Product name *
+            </p>
             <TextField
               fullWidth
               required
@@ -75,7 +77,9 @@ const AddProduct: React.FC = () => {
             />
           </Grid>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}>Units*</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Units*
+            </p>
             <TextField
               fullWidth
               required
@@ -85,7 +89,10 @@ const AddProduct: React.FC = () => {
             />
           </Grid>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}> Category *</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              {' '}
+              Category *
+            </p>
             <Autocomplete
               disablePortal
               id="combo-box-demo"
@@ -105,7 +112,9 @@ const AddProduct: React.FC = () => {
             />
           </Grid>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}>Sub Category *</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Sub Category *
+            </p>
             <Autocomplete
               disablePortal
               id="combo-box-demo"
@@ -125,7 +134,9 @@ const AddProduct: React.FC = () => {
             />
           </Grid>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}>Alert Quantity *</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Alert Quantity *
+            </p>
             <TextField
               fullWidth
               required
@@ -140,7 +151,9 @@ const AddProduct: React.FC = () => {
       <Paper style={{ marginTop: '20px', padding: '20px' }} elevation={10}>
         <Grid style={{ padding: 10 }} container columnSpacing={1}>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}>Purchase Cost *</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Purchase Cost *
+            </p>
             <TextField
               fullWidth
               required
@@ -150,7 +163,9 @@ const AddProduct: React.FC = () => {
             />
           </Grid>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}>Sell price*</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Sell price*
+            </p>
             <TextField
               fullWidth
               required
@@ -160,7 +175,10 @@ const AddProduct: React.FC = () => {
             />
           </Grid>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}> Min sale price *</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              {' '}
+              Min sale price *
+            </p>
             <TextField
               fullWidth
               required
@@ -170,7 +188,9 @@ const AddProduct: React.FC = () => {
             />
           </Grid>
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}>Min qnty order *</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Min qnty order *
+            </p>
             <TextField
               fullWidth
               required
@@ -181,7 +201,9 @@ const AddProduct: React.FC = () => {
           </Grid>
 
           <Grid item xs={4}>
-            <p style={{ transform: 'TranslateY(10px)' }}>Bar Type *</p>
+            <p style={{ transform: 'TranslateY(10px)', fontWeight: 'bold' }}>
+              Bar Type *
+            </p>
             <TextField
               fullWidth
               required
