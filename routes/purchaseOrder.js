@@ -11,15 +11,13 @@ router.get('/', async (req, res) => {
       let result = [
         {
           order_id: '',
-          order_date: '',
-          delivery_date: '',
           supplier: '',
+          purchase_date: '',
           purchase_status: '',
-          items: [{ item: '', quantity: 0, price: 0, amount: 0 }],
-          discount: '',
-          taxamount: '',
+          business_location: '',
+          items: [[{ item: '', quantity: 0, price: 0, amount: 0 }]],
+          whole_discount: '',
           total: '',
-          paid: '',
         },
       ];
       res.send(result);
@@ -34,20 +32,18 @@ router.get('/', async (req, res) => {
 router.get('/orders', async (req, res) => {
   try {
     const resp = await client.query(
-      'SELECT order_id, order_date, delivery_date, supplier, purchase_status, discount, taxAmount, total, paid, payment_option FROM purchase_order'
+      'SELECT id, supplier, purchase_date,  purchase_status, business_location, whole_discount, total FROM purchase_order'
     );
     if (resp.rows.length === 0) {
       let result = [
         {
-          order_id: '',
-          order_date: '',
-          delivery_date: '',
+          id: '',
+          purchase_date: '',
           supplier: '',
           purchase_status: '',
-          discount: '',
-          taxamount: '',
+          business_location: '',
+          whole_discount: '',
           total: '',
-          paid: '',
         },
       ];
       res.send(result);
@@ -63,21 +59,19 @@ router.get('/orders/:order_id', async (req, res) => {
   const { order_id } = req.params;
   try {
     const resp = await client.query(
-      `SELECT * FROM purchase_order WHERE order_id = '${order_id}'`
+      `SELECT * FROM purchase_order WHERE id = '${order_id}'`
     );
     if (resp.rows.length === 0) {
       let result = [
         {
           order_id: '',
-          order_date: '',
-          delivery_date: '',
           supplier: '',
+          purchase_date: '',
           purchase_status: '',
-          items: [{ item: '', quantity: 0, price: 0, amount: 0 }],
-          discount: '',
-          taxamount: '',
+          business_location: '',
+          items: [[{ item: '', quantity: 0, price: 0, amount: 0 }]],
+          whole_discount: '',
           total: '',
-          paid: '',
         },
       ];
       res.send(result);
