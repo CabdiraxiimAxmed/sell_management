@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import moment from 'moment';
-import EditIcon from '@mui/icons-material/Edit';
-import { useNavigate } from 'react-router-dom';
 import { styled, alpha } from '@mui/material/styles';
 import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import Menu, { MenuProps } from '@mui/material/Menu';
 import {
-  Box, Stack,
+  TablePagination,
+  Stack,
   Typography,
   Button,
   MenuItem,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  DialogTitle,
-  Dialog,
-  TextField,
-  Autocomplete,
   Paper,
   TableContainer,
   Table,
@@ -26,15 +17,11 @@ import {
   TableCell,
   TableBody,
 } from '@mui/material';
-import Menu, { MenuProps } from '@mui/material/Menu';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BoltIcon from '@mui/icons-material/Bolt';
-import PersonIcon from '@mui/icons-material/Person';
-import { blue } from '@mui/material/colors';
 import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import Divider from '@mui/material/Divider';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -46,19 +33,19 @@ type OrderType = {
   supplier: string;
   purchase_date: string;
   purchase_status: string;
-  business_location: string;
-  whole_discount: string;
   total: string;
+  whole_discount: string;
+  paid: string;
 };
 interface Columns {
   id:
-    | 'id'
-    | 'supplier'
-    | 'purchase_date'
-    | 'purchase_status'
-    | 'business_location'
-    | 'whole_discount'
-    | 'total';
+  | 'id'
+  | 'supplier'
+  | 'purchase_date'
+  | 'purchase_status'
+  | 'total'
+  | 'whole_discount'
+  | 'paid';
   label: string;
   minWidth?: number;
   align?: 'right';
@@ -75,9 +62,9 @@ const Supplier: React.FC = () => {
       supplier: '',
       purchase_date: '',
       purchase_status: '',
-      business_location: '',
-      whole_discount: '',
       total: '',
+      whole_discount: '',
+      paid: '',
     },
   ]);
   const [ordersStore, setOrdersStore] = useState<OrderType[]>([
@@ -86,22 +73,22 @@ const Supplier: React.FC = () => {
       supplier: '',
       purchase_date: '',
       purchase_status: '',
-      business_location: '',
-      whole_discount: '',
       total: '',
+      whole_discount: '',
+      paid: '',
     },
   ]);
 
   const [purchaseStatusChange, setPurchaseStatusChange] = useState<{
     top: number;
     left: number;
-    order_id: string;
+    id: number;
     open: boolean;
     status: string;
   }>({
     top: 0,
     left: 0,
-    order_id: '',
+    id: 0,
     open: false,
     status: '',
   });
@@ -110,20 +97,26 @@ const Supplier: React.FC = () => {
     { id: 'supplier', label: 'Supplier', minWidth: 170 },
     { id: 'purchase_date', label: 'purchase_date', minWidth: 170 },
     { id: 'purchase_status', label: 'purchase_status', minWidth: 170 },
-    { id: 'business_location', label: 'business_location', minWidth: 170 },
+    {
+      id: 'total',
+      label: 'total',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => `$${value.toLocaleString('en-US')}`,
+    },
     {
       id: 'whole_discount',
-      label: 'Alertquantity',
+      label: 'discount',
       minWidth: 100,
       align: 'right',
       format: (value: number) => value.toLocaleString('en-US'),
     },
     {
-      id: 'total',
-      label: 'units',
+      id: 'paid',
+      label: 'paid',
       minWidth: 100,
       align: 'right',
-      format: (value: number) => value.toLocaleString('en-US'),
+      format: (value: number) => `$${value.toLocaleString('en-US')}`,
     },
   ];
 
@@ -156,9 +149,9 @@ const Supplier: React.FC = () => {
             supplier: '',
             purchase_date: '',
             purchase_status: '',
-            business_location: '',
-            whole_discount: '',
             total: '',
+            whole_discount: '',
+            paid: '',
           },
         ]);
         return;
@@ -167,10 +160,6 @@ const Supplier: React.FC = () => {
     } else {
       setOrders(ordersStore);
     }
-  };
-
-  const goOrderPaper = (id: string) => {
-    navigate(`/purchase-order/${id}`);
   };
 
   const filterOrders = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,9 +174,9 @@ const Supplier: React.FC = () => {
           supplier: '',
           purchase_date: '',
           purchase_status: '',
-          business_location: '',
-          whole_discount: '',
           total: '',
+          whole_discount: '',
+          paid: '',
         },
       ]);
       return;
@@ -195,12 +184,12 @@ const Supplier: React.FC = () => {
     setOrders(filtered);
   };
 
-  const handlePurchaseStatus = (e: any, order_id: string, status: string) => {
-    if (status === 'ladalbay')
+  const handlePurchaseStatus = (e: any, id: number, status: string) => {
+    if (status === 'pending')
       setPurchaseStatusChange({
         top: e.clientY,
         left: e.clientX,
-        order_id,
+        id,
         open: !purchaseStatusChange.open,
         status,
       });
@@ -222,15 +211,32 @@ const Supplier: React.FC = () => {
     setPage(0);
   };
 
+  const supplierPage = (page: string) => {
+      navigate(`/supplier-info/${page}`);
+  };
+
+
   return (
     <>
       {purchaseStatusChange.open && (
         <ChangePurchaseStatus
           top={purchaseStatusChange.top}
           left={purchaseStatusChange.left}
-          order_id={purchaseStatusChange.order_id}
+          id={purchaseStatusChange.id}
         />
       )}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <Stack
         direction="row"
         alignItems="center"
@@ -260,26 +266,26 @@ const Supplier: React.FC = () => {
           <div className="filters-container">
             <div className="dropdown">
               <button className="dropBtn">
-                <BoltIcon /> xaladda
+                <BoltIcon /> status
               </button>
               <div className="dropdown-content">
                 <label className="switch">
                   <input
                     type="checkbox"
-                    name="ladalbay"
+                    name="pending"
                     className="checkbox"
                     onChange={handleFilterStatus}
                   />
-                  <span>ladalbay</span>
+                  <span>pending</span>
                 </label>
                 <label className="switch">
                   <input
                     type="checkbox"
-                    name="lahelay"
+                    name="received"
                     className="checkbox"
                     onChange={handleFilterStatus}
                   />
-                  <span>lahelay</span>
+                  <span>received</span>
                 </label>
               </div>
             </div>
@@ -309,16 +315,16 @@ const Supplier: React.FC = () => {
                       {column.label}
                     </TableCell>
                   ))}
-                    <TableCell
-                      align="left"
-                      style={{
-                        minWidth: 170,
-                        backgroundColor: 'black',
-                        color: 'white',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                    </TableCell>
+                  <TableCell
+                    align="left"
+                    style={{
+                      minWidth: 170,
+                      backgroundColor: 'black',
+                      color: 'white',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -332,29 +338,168 @@ const Supplier: React.FC = () => {
                       tabIndex={-1}
                       key={index}
                     >
-                      {columns.map((column: Columns, index: number) => {
-                        const value = row[column.id];
-                        return (
-                          <TableCell key={index} align={column.align}>
-                            {column.format && typeof value === 'number'
-                              ? column.format(value)
-                              : value}
-                          </TableCell>
-                        );
-                      })}
+                      <TableCell align="right"> {row.id} </TableCell>
+                      <TableCell onClick={() => supplierPage(row.supplier)}><Button variant='text'>{row.supplier}</Button></TableCell>
+                      <TableCell> {row.purchase_date} </TableCell>
+                      <TableCell> <Button
+                        onClick={(e) => handlePurchaseStatus(e, row.id, row.purchase_status)}
+                        variant='text'>{row.purchase_status}</Button> </TableCell>
+                      <TableCell align="right"> $ {row.total} </TableCell>
+                      <TableCell align="right"> $ {row.whole_discount} </TableCell>
+                      <TableCell align="right"> $ {row.paid} </TableCell>
                       <TableCell>
-                        <Button onClick={() => goOrderPaper(row.id)} variant="contained">view</Button>
+                        <OrderMenuButton id={row.id} total={row.total} paid={row.paid} />
                       </TableCell>
                     </TableRow>
                   ))}
               </TableBody>
             </Table>
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 100]}
+              component="div"
+              count={orders.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </TableContainer>
         </Paper>
       </div>
     </>
   );
 };
+
+interface OrderMenuProps {
+  id: number;
+  paid: string;
+  total: string;
+}
+
+const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total }) => {
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  }
+  const viewOrder = () => {
+    navigate(`/purchase-order/${id}`);
+  }
+  const paidOrder = () => {
+    axios.post("http://localhost:2312/purchase/payment", { id, paid: total })
+      .then(resp => {
+        if (resp.data === 'success') toast.success("success")
+        else if (resp.data === 'error') toast.error("error happened");
+      })
+      .catch(error => {
+        toast.error(error.message);
+      })
+  }
+  const deleteOrder = () => {
+    axios.post('http://localhost:2312/purchase/delete', { id: id })
+      .then(resp => {
+        if (resp.data === 'success') {
+          toast.success("success");
+        } else if (resp.data === 'error') {
+          toast.error("error happened");
+        }
+      })
+      .catch(error => {
+        toast.error(error.message);
+      })
+      ;
+  }
+  const handleClose = (action: string) => {
+    switch (action) {
+      case "view":
+        viewOrder();
+        break;
+      case "paid":
+        paidOrder();
+        break;
+      case "delete":
+        deleteOrder();
+        break;
+      default:
+        break;
+    }
+    setAnchorEl(null);
+  }
+
+  const isDisable = () => parseFloat(paid) >= parseFloat(total);
+
+  return (
+    <>
+      <IconButton color="primary" onClick={handleClick}>
+        <MoreVertIcon />
+      </IconButton>
+      <StyledMenu
+        id="demo-customized-menu"
+        MenuListProps={{
+          'aria-labelledby': 'demo-customized-button',
+        }}
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={() => handleClose("view")} disableRipple>
+          <ViewWeekIcon />
+          View
+        </MenuItem>
+        <MenuItem disabled={isDisable()} onClick={() => handleClose("paid")} disableRipple>
+          <AttachMoneyIcon />
+          Paid
+        </MenuItem>
+        <MenuItem style={{ color: "red" }} onClick={() => handleClose("delete")} disableRipple>
+          <DeleteIcon style={{ color: "red" }} />
+          Delete
+        </MenuItem>
+      </StyledMenu>
+    </>
+  )
+}
+
+const StyledMenu = styled((props: MenuProps) => (
+  <Menu
+    elevation={0}
+    anchorOrigin={{
+      vertical: 'bottom',
+      horizontal: 'right',
+    }}
+    transformOrigin={{
+      vertical: 'top',
+      horizontal: 'right',
+    }}
+    {...props}
+  />
+))(({ theme }) => ({
+  '& .MuiPaper-root': {
+    borderRadius: 6,
+    marginTop: theme.spacing(1),
+    minWidth: 180,
+    color:
+      theme.palette.mode === 'light' ? 'rgb(55, 65, 81)' : theme.palette.grey[300],
+    boxShadow:
+      'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
+    '& .MuiMenu-list': {
+      padding: '4px 0',
+    },
+    '& .MuiMenuItem-root': {
+      '& .MuiSvgIcon-root': {
+        fontSize: 18,
+        color: theme.palette.text.secondary,
+        marginRight: theme.spacing(1.5),
+      },
+      '&:active': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          theme.palette.action.selectedOpacity,
+        ),
+      },
+    },
+  },
+}));
 
 export type { OrderType };
 export default Supplier;

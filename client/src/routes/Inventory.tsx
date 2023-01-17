@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import AddProduct from '../components/AddProduct';
-import EditProduct from '../components/EditProduct';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import {
@@ -58,22 +56,7 @@ const Products: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  const [addProduct, setAddProduct] = useState<boolean>(false);
-  const [editProduct, setEditProduct] = useState<boolean>(false);
-  const [productToEdit, setProductToEdit] = useState<ProductType>({
-    id: 0,
-    name: '',
-    units: 0,
-    category: '',
-    sub_category: '',
-    alert_quantity: 0,
-    purchase_cost: 0,
-    sale_price: 0,
-    min_sale_price: 0,
-    min_quantity_order: 0,
-    bar_code: '',
-    created_date: '',
-  });
+
   const [products, setProducts] = useState<ProductType[]>([
     {
       id: 0,
@@ -121,14 +104,14 @@ const Products: React.FC = () => {
     { id: 'sub_category', label: 'Sub Category', minWidth: 170 },
     {
       id: 'alert_quantity',
-      label: 'Alert Quantity',
+      label: 'Alertquantity',
       minWidth: 100,
       align: 'right',
       format: (value: number) => value.toLocaleString('en-US'),
     },
     {
       id: 'purchase_cost',
-      label: 'Purchase Cost',
+      label: 'PurchaseCost',
       minWidth: 100,
       align: 'right',
       format: (value: number) => value.toLocaleString('en-US'),
@@ -197,15 +180,6 @@ const Products: React.FC = () => {
     setProducts(filtered);
   };
 
-  const handleEditProduct = (id: number) => {
-    let foundProduct: ProductType = products.filter((product: ProductType) => {
-      return product.id === id;
-    })[0];
-    if (!foundProduct.name) return;
-    setProductToEdit(foundProduct);
-    setEditProduct(!editProduct);
-  };
-
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -231,8 +205,6 @@ const Products: React.FC = () => {
         pauseOnHover
         theme="dark"
       />
-      {addProduct && <AddProduct />}
-      {editProduct && <EditProduct product={productToEdit} />}
       <Stack
         direction="row"
         alignItems="center"
@@ -285,6 +257,7 @@ const Products: React.FC = () => {
                         backgroundColor: 'black',
                         color: 'white',
                         fontWeight: 'bold',
+                        padding: '2px',
                       }}
                     >
                       {column.label}
@@ -306,7 +279,11 @@ const Products: React.FC = () => {
                       {columns.map((column: Columns, index: number) => {
                         const value = row[column.id];
                         return (
-                          <TableCell key={index} align={column.align}>
+                          <TableCell
+                            style={{ padding: '0' }}
+                            key={index}
+                            align={column.align}
+                          >
                             {column.format && typeof value === 'number'
                               ? column.format(value)
                               : value}

@@ -66,13 +66,13 @@ const Customers: React.FC = () => {
     created_date: true,
   });
   useEffect(() => {
-    axios.get('/customers')
+    axios.get('http://localhost:2312/customers')
          .then(res => {
            setCustomers(res.data);
            setCustomersStore(res.data);
          })
-         .catch(err => {
-           toast.error('qalad ayaa dhacay');
+         .catch(error => {
+           toast.error(error.message);
          })
   }, [])
 

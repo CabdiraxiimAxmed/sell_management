@@ -1,12 +1,10 @@
 const express = require('express');
 const client = require('../models/connect');
-const orderid = require('order-id')('ahmed');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
     const resp = await client.query('SELECT * FROM purchase_order');
-    let test = resp.rows;
     if (resp.rows.length === 0) {
       let result = [
         {
@@ -32,7 +30,7 @@ router.get('/', async (req, res) => {
 router.get('/orders', async (req, res) => {
   try {
     const resp = await client.query(
-      'SELECT id, supplier, purchase_date,  purchase_status, business_location, whole_discount, total FROM purchase_order'
+      'SELECT id, supplier, purchase_date,  purchase_status, total, whole_discount, paid FROM purchase_order'
     );
     if (resp.rows.length === 0) {
       let result = [
@@ -153,15 +151,15 @@ router.post('/purchase-order', async (req, res) => {
 });
 
 router.post('/received', async (req, res) => {
-  const { order_id, items, status } = req.body;
+  const { id, items, status } = req.body;
   try {
     for (let item of items) {
       await client.query(
-        `UPDATE products set quantity=quantity+'${item.quantity}' WHERE name='${item.item}'`
+        `UPDATE products set units=units+'${item.itemQuantity}' WHERE name='${item.name}'`
       );
     }
     await client.query(
-      `UPDATE purchase_order set purchase_status='${status}' WHERE order_id = '${order_id}'`
+      `UPDATE purchase_order set purchase_status='${status}' WHERE id = '${id}'`
     );
     res.send('success');
   } catch (err) {
@@ -170,67 +168,17 @@ router.post('/received', async (req, res) => {
   }
 });
 
-router.post('/full-payment', async (req, res) => {
-  let { paidAmount, prevPaid, order_id, payment_option } = req.body;
-  let totalPaid = paidAmount + parseFloat(prevPaid);
-  try {
-    const resp = await client.query(
-      `UPDATE purchase_order set paid='${totalPaid}', payment_option='${payment_option}' WHERE order_id='${order_id}'`
-    );
-    res.send('success');
-  } catch (err) {
-    res.send('error');
-  }
-});
 
-router.post('/partial-payment', async (req, res) => {
-  let {
-    paidAmount,
-    prevPaid,
-    order_id,
-    total,
-    payment_option,
-    payments,
-    supplier,
-    recordedDate,
-  } = req.body;
-  let formatPayments = JSON.stringify(payments);
-  let totalPaid = paidAmount + parseFloat(prevPaid);
-  if (payment_option) {
-    let debtAmount = parseFloat(total) - totalPaid;
-    try {
-      const purch = await client.query(
-        `UPDATE purchase_order set paid='${totalPaid}', payment_option='${payment_option}' WHERE order_id='${order_id}'`
-      );
-      const debt = await client.query(
-        `INSERT INTO purch_debt (amount, order_id, is_paid, supplier, recordedDate, initialamount, payments) VALUES('${
-          parseFloat(total) - totalPaid
-        }', '${order_id}', '${false}', '${supplier}', '${recordedDate}', '${debtAmount}', array['${formatPayments}']::json[])`
-      );
-      res.send('success');
-    } catch (err) {
-      console.log(err);
-      res.send('error');
-    }
-  } else {
-    try {
-      let is_paid = false;
-      if (totalPaid === parseFloat(total)) {
-        is_paid = true;
-      }
-      const purch = await client.query(
-        `UPDATE purchase_order set paid='${totalPaid}' WHERE order_id='${order_id}'`
-      );
-      const debt = await client.query(
-        `UPDATE purch_debt set amount='${
-          parseFloat(total) - totalPaid
-        }', payments=array_append(payments, '${formatPayments}'), is_paid='${is_paid}' WHERE order_id='${order_id}'`
-      );
-      res.send('success');
-    } catch (err) {
-      console.log(err);
-      res.send('error');
-    }
+router.post('/payment', async (req, res) => {
+  let { id, paid } = req.body;
+  console.log({ id, paid });
+  paid = parseFloat(paid);
+  try {
+    await client.query(`UPDATE purchase_order set paid='${paid}' WHERE id='${id}'`)
+    res.send('success');
+  }catch(err) {
+    console.log(err);
+    res.send("error");
   }
 });
 
@@ -249,11 +197,11 @@ router.post('/edit', (req, res) => {
   res.send('success');
 });
 
-router.post('/delete/:order_id', async (req, res) => {
-  const { order_id } = req.params;
+router.post('/delete', async (req, res) => {
+  const { id } = req.body;
   try {
-    const resp = await client.query(
-      `DELETE FROM purchase_order WHERE order_id='${order_id}'`
+    await client.query(
+      `DELETE FROM purchase_order WHERE id='${id}'`
     );
     res.send('success');
   } catch (err) {

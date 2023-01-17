@@ -66,7 +66,7 @@ const Home: React.FC = () => {
   const [dateExpense, setDateExpense] = useState<string>("");
   const [dateCustomerDebt, setDateCustomerDebt] = useState<string>("");
   const [dateSupplierDebt, setDateSupplierDebt] = useState<string>("");
-  useEffect(() => {
+ useEffect(() => {
     axios.post("/sell/revenue", { dateStr: monthRevenue }).then((res) => {
       if (res.data == "error") {
         toast.error("SERVER: qalad ayaa dhacay");
