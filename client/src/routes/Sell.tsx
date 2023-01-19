@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Divider, TextField, Typography, Box, IconButton, Button, Autocomplete, ToggleButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
 import { RootState } from '../app/store';
 import { useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
@@ -15,13 +14,18 @@ type ProductNamesType = {
 };
 
 type ItemType = {
-  id: number,
-  name: string,
-  supplier: string,
-  quantity: number,
-  alerquantity: number,
-  barcode: string,
-  price: string,
+  id: number;
+  name: string;
+  units: number;
+  category: string;
+  sub_category: string;
+  alert_quantity: number;
+  purchase_cost: number;
+  sale_price: number;
+  min_sale_price: number;
+  min_quantity_order: number;
+  bar_code: string;
+  created_date: string;
 }
 
 const Sell: React.FC = () => {
@@ -32,19 +36,24 @@ const Sell: React.FC = () => {
   const [displayDiscount, setDisplayDiscount] = useState<boolean>(false);
   const [discount, setDiscount] = useState<number>(0);
   const [valueHolders, setValueHolders] = useState<any>({});
-  const [productNames, setProductNames] = useState<ProductNamesType[]>([{label: ''}]);
-  const [customerNames, setCustomerNames] = useState<ProductNamesType[]>([{label: ''}]);
+  const [productNames, setProductNames] = useState<ProductNamesType[]>([{ label: '' }]);
+  const [customerNames, setCustomerNames] = useState<ProductNamesType[]>([{ label: '' }]);
   const [count, setCount] = useState<number>(0);
 
   const [items, setItems] = useState<ItemType[]>([
     {
       id: 0,
       name: '',
-      supplier: '',
-      quantity: 0,
-      alerquantity: 0,
-      barcode: '',
-      price: '',
+      units: 0,
+      category: '',
+      sub_category: '',
+      alert_quantity: 0,
+      purchase_cost: 0,
+      sale_price: 0,
+      min_sale_price: 0,
+      min_quantity_order: 0,
+      bar_code: '',
+      created_date: '',
     }
   ]);
 
@@ -59,27 +68,27 @@ const Sell: React.FC = () => {
   };
 
   useEffect(() => {
-    axios.get('/products/products-name')
-         .then(res => {
-           setProductNames(res.data);
-         })
-         .catch(err => {
-           toast.error('qalad ayaa dhacay');
-         })
-    axios.get('/customers/customer-name')
-         .then(res => {
-           setCustomerNames(res.data);
-         })
-         .catch(err => {
-           toast.error('qalad ayaa dhacay');
-         })
-    axios.get('/products')
-         .then(res => {
-           setItems(res.data);
-         })
-         .catch(err => {
-           toast.error('qalad ayaa dhacay');
-         })
+    axios.get('http://localhost:2312/products/products-name')
+      .then(res => {
+        setProductNames(res.data);
+      })
+      .catch(error => {
+        toast.error(error.message);
+      })
+    axios.get('http://localhost:2312/customers/customer-name')
+      .then(res => {
+        setCustomerNames(res.data);
+      })
+      .catch(error => {
+        toast.error(error.message);
+      })
+    axios.get('http://localhost:2312/products')
+      .then(res => {
+        setItems(res.data);
+      })
+      .catch(error => {
+        toast.error(error.message);
+      })
   }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -87,44 +96,49 @@ const Sell: React.FC = () => {
     const data = new FormData(e.currentTarget);
     const customer = data.get('customer');
     let recordedDate = moment().format('MMMM Do YYYY, h:mm:ss a');
-    if(!customer) {
+    if (!customer) {
       toast.warn('fadlan xogta dhamestir');
       return;
     }
     let count = Object.keys(valueHolders).length / 2;
-    let items = [];
-    for(let i = 0; i < count; i++) {
+    let products: {[key: string]: any}[] = [];
+    for (let i = 0; i < count; i++) {
       let itemQuantity = valueHolders[`quantity${i}`];
       let itemPrice = valueHolders[`price${i}`];
       let amount = Math.round((itemQuantity * itemPrice) * 100) / 100;
-      if(!data.get(`item${i}`) || !data.get(`quantity${i}`)){
+      if (!data.get(`item${i}`) || !data.get(`quantity${i}`)) {
         toast.warn('fadlan dhameystir xogta');
         return;
       }
-      let item = {"item": data.get(`item${i}`), "quantity": itemQuantity, "price": valueHolders[`price${i}`], amount}
-      items.push(item);
+      let foundItem: any = items.find(item => item.name === data.get(`item${i}`));
+      if (parseFloat(foundItem.units) < itemQuantity) {
+        toast.warn(`${foundItem.name} is not enough`);
+        return;
+      }
+      let item = { "item": data.get(`item${i}`), "quantity": itemQuantity, "price": valueHolders[`price${i}`], amount }
+      products.push(item);
     }
 
-    let total = getSubTotalAndAllTotal(valueHolders,  discount).total;
-    axios.post('/sell/sell-order', {customer, is_debt: selected,  items, discount, total, username: user.username, recordedDate})
-           .then(res => {
-             if(res.data == 'success') {
-               toast.success('waa lagu guuleystay');
-               setTimeout(() => {
-                 navigate('/sells');
-               }, 2000);
-             } else if (res.data == 'error') {
-               toast.error('server: qalad ayaa dhacay');
-             }
-           }).catch(err => {
-             toast.error('qalad ayaa dhacay');
-           })
+    let total = getSubTotalAndAllTotal(valueHolders, discount).total;
+    axios.post('http://localhost:2312/sell/sell-order', { customer, is_debt: selected, products, discount, total, username: user.username, recordedDate })
+      .then(res => {
+        if (res.data == 'success') {
+          toast.success('waa lagu guuleystay');
+          setTimeout(() => {
+            navigate('/sells');
+          }, 2000);
+        } else if (res.data == 'error') {
+          toast.error('server: qalad ayaa dhacay');
+        }
+      }).catch(error => {
+        toast.error(error.message);
+      })
   };
   const getAmount = (quantity: string, price: string) => {
     let itemQuantity = valueHolders[quantity];
     let itemPrice = valueHolders[price];
     let amount: number = 0.00;
-    if(!itemQuantity || !itemPrice) {
+    if (!itemQuantity || !itemPrice) {
       return amount;
     }
     amount = Math.round((itemQuantity * itemPrice) * 100) / 100;
@@ -141,18 +155,18 @@ const Sell: React.FC = () => {
     let foundItem: any = items.find(item => item.name == name)
     setValueHolders({
       ...valueHolders,
-      [`price${index}`]: parseFloat(foundItem.price),
+      [`price${index}`]: parseFloat(foundItem.sale_price),
     });
   };
 
   const debtDisable = () => {
-    if(customerOptions === 'deg-deg' || !customerOptions) return true;
+    if (customerOptions === 'deg-deg' || !customerOptions) return true;
     return false;
   };
 
   let subTotal = getSubTotalAndAllTotal(valueHolders, discount).subTotal;
   let total = getSubTotalAndAllTotal(valueHolders, discount).total;
-  let sellState = [{label: 'taala'}, {label: 'baxday'}];
+  let sellState = [{ label: 'taala' }, { label: 'baxday' }];
   return (
     <Box component="form" noValidate onSubmit={handleSubmit}>
       <ToastContainer
@@ -167,7 +181,7 @@ const Sell: React.FC = () => {
         pauseOnHover
         theme="dark"
       />
-      <Grid container rowSpacing={1} columnSpacing ={2} style={{backgroundColor: 'white', borderRadius: '10px'}}>
+      <Grid container rowSpacing={1} columnSpacing={2} style={{ backgroundColor: 'white', borderRadius: '10px' }}>
         {/* Purchase details */}
         <Grid item xs={12}>
           <Typography variant="subtitle1">xogta bixinta</Typography>
@@ -195,12 +209,12 @@ const Sell: React.FC = () => {
               setSelected(!selected);
             }}
           >
-            Deyn
+            Debt
           </ToggleButton>
         </Grid>
         {/* Items to order */}
         <Grid item xs={12}>
-          <Typography variant="subtitle1">alaab aad bixineyso</Typography>
+          <Typography variant="subtitle1">Items to be sold</Typography>
         </Grid>
         <Grid item xs={3}>
           <Autocomplete
@@ -223,14 +237,14 @@ const Sell: React.FC = () => {
             label="Cadadka"
             type="number"
             name="quantity0"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 0) }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 0)}
           />
         </Grid>
         <Grid item xs={3}>
           <Typography variant="h6">qiimaha: ${valueHolders['price0']}</Typography>
         </Grid>
         <Grid item xs={3}>
-          <Box sx={{display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection:'column'}}>
+          <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection: 'column' }}>
             <Typography variant="body2">qiimamaha</Typography>
             <Typography variant="h6">${getAmount('quantity0', 'price0')}</Typography>
           </Box>
@@ -244,10 +258,10 @@ const Sell: React.FC = () => {
                 isOptionEqualToValue={(option, value) => option.label === value.label}
                 options={productNames}
                 onInputChange={(event, newInputValue) => {
-                  handleItemPrice(index+1, newInputValue);
+                  handleItemPrice(index + 1, newInputValue);
                 }}
                 sx={{ width: 250 }}
-                renderInput={(params) => <TextField {...params} label="alaabta" name={`item${index+1}`} size="small" />}
+                renderInput={(params) => <TextField {...params} label="alaabta" name={`item${index + 1}`} size="small" />}
               />
             </Grid>
             <Grid item xs={3}>
@@ -257,23 +271,23 @@ const Sell: React.FC = () => {
                 size="small"
                 label="Cadadka"
                 type="number"
-                name={`quantity${index+1}`}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 1) }
+                name={`quantity${index + 1}`}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, 1)}
               />
             </Grid>
             <Grid item xs={3}>
-              <Typography variant="h6">qiimaha: ${valueHolders[`price${index+1}`]}</Typography>
+              <Typography variant="h6">qiimaha: ${valueHolders[`price${index + 1}`]}</Typography>
             </Grid>
             <Grid item xs={1}>
-              <Box sx={{display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection:'column'}}>
+              <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection: 'column' }}>
                 <Typography variant="body2">qiimamaha</Typography>
-                <Typography variant="h6">${getAmount(`quantity${index+1}`, `price${index+1}`)}</Typography>
+                <Typography variant="h6">${getAmount(`quantity${index + 1}`, `price${index + 1}`)}</Typography>
               </Box>
             </Grid>
             <Grid item xs={1}>
-              <Box sx={{display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection:'column'}}>
+              <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'center', flexDirection: 'column' }}>
                 <IconButton color="warning" onClick={() => {
-                  removeValueHolders(`quantity${index+1}`, `price${index+1}`)
+                  removeValueHolders(`quantity${index + 1}`, `price${index + 1}`)
                   setCount(count - 1)
                 }}>
                   <CloseIcon />
@@ -282,44 +296,44 @@ const Sell: React.FC = () => {
             </Grid>
           </Grid>
         ))}
-        <Grid item xs={3} style={{paddingTop:'0'}}>
-          <IconButton color="primary" onClick={() => setCount(count+1) }>
+        <Grid item xs={3} style={{ paddingTop: '0' }}>
+          <IconButton color="primary" onClick={() => setCount(count + 1)}>
             <AddIcon />
           </IconButton>
         </Grid>
-      <Divider/>
+        <Divider />
         <Grid item xs={3}>
-          <Box sx={{border: '1px dashed grey'}}>
+          <Box sx={{ border: '1px dashed grey' }}>
             <Grid container rowSpacing={2}>
               <Grid item xs={6}>
                 <Typography variant="body1">wadarHore</Typography>
               </Grid>
               <Grid item xs={6}>
-                <Typography variant="body1" style={{textAlign: 'end'}}>${subTotal}</Typography>
+                <Typography variant="body1" style={{ textAlign: 'end' }}>${subTotal}</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body1">discount({discount}$)</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Button color="secondary" style={{marginLeft: '17px'}} onClick={() => setDisplayDiscount(!displayDiscount) }>badal</Button>
+                <Button color="secondary" style={{ marginLeft: '17px' }} onClick={() => setDisplayDiscount(!displayDiscount)}>badal</Button>
               </Grid>
               <Grid item xs={3}>
-                <Typography variant="body1" style={{textAlign: 'end'}}>${discount}</Typography>
+                <Typography variant="body1" style={{ textAlign: 'end' }}>${discount}</Typography>
               </Grid>
-              <Grid item xs={12} className={displayDiscount? '': 'inactive'}>
+              <Grid item xs={12} className={displayDiscount ? '' : 'inactive'}>
                 <TextField label="$" variant="filled" type="number" size="small" onChange={(e) => {
-                  if(!e.target.value){
+                  if (!e.target.value) {
                     setDiscount(0);
                     return
                   }
                   setDiscount(parseFloat(e.target.value))
-                } } />
+                }} />
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body1">Wadarta guud</Typography>
               </Grid>
               <Grid item xs={6}>
-                <Typography variant="body1" style={{textAlign: 'end'}}>${total}</Typography>
+                <Typography variant="body1" style={{ textAlign: 'end' }}>${total}</Typography>
               </Grid>
             </Grid>
           </Box>
@@ -335,19 +349,19 @@ const Sell: React.FC = () => {
 };
 
 
-const getSubTotalAndAllTotal = (valueHolders:any, discount: number) => {
+const getSubTotalAndAllTotal = (valueHolders: any, discount: number) => {
   let subTotal = 0;
   let total = 0;
-  let count = Object.keys(valueHolders).length/2
-  for(let i = 0; i < count; i++) {
+  let count = Object.keys(valueHolders).length / 2
+  for (let i = 0; i < count; i++) {
     let priceName = `price${i}`
     let quantityName = `quantity${i}`
-    if(!valueHolders[priceName] || !valueHolders[quantityName]) continue;
+    if (!valueHolders[priceName] || !valueHolders[quantityName]) continue;
     subTotal += Math.round((valueHolders[priceName] * valueHolders[quantityName]) * 100) / 100;
   }
-  total = Math.round((subTotal -discount) * 100) / 100;
+  total = Math.round((subTotal - discount) * 100) / 100;
 
-  return {subTotal, total};
+  return { subTotal, total };
 }
 
 export default Sell;

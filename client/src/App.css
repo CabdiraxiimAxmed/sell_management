@@ -101,6 +101,9 @@ body {
   border-top-right-radius: 5px;
   box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.4);
 }
+.table-cell {
+  padding: 2px 0 !important;
+}
 
 /* design add-user */
 .add-user-container {

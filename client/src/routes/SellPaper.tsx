@@ -57,21 +57,21 @@ const PurchasePaper: React.FC = () => {
   })
 
   useEffect(() => {
-    axios.get(`/sell/sell/${order_id}`)
+    axios.get(`http://localhost:2312/sell/sell/${order_id}`)
          .then(res => {
            if(res.data == 'error') {
              toast.error("SERVER: qalad ayaa dhacay");
              return;
            }
            setSell(res.data);
-         }) .catch(err => {
-           toast.error('qalad ayaa dhacay');
+         }) .catch(error => {
+           toast.error(error.message);
          })
   }, []);
 
   useEffect(() => {
     if (sell[0].customer) {
-      axios.post('/customers/name', {name: sell[0].customer})
+      axios.post('http://localhost:2312/customers/name', {name: sell[0].customer})
            .then(res => {
              if(res.data == 'error') {
                toast.error("SERVER: qalad ayaa dhacay");
@@ -79,8 +79,8 @@ const PurchasePaper: React.FC = () => {
              }
              console.log(res.data);
              setCustomer(res.data);
-           }) .catch(err => {
-             toast.error('qalad ayaa dhacay');
+           }) .catch(error => {
+             toast.error(error.message);
            })
     }
   }, [sell])

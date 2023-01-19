@@ -91,7 +91,7 @@ const Products: React.FC = () => {
   ]);
 
   const columns: readonly Columns[] = [
-    { id: 'id', label: 'id', minWidth: 100, align: 'right' },
+    { id: 'id', label: 'id', minWidth: 100 },
     { id: 'name', label: 'Name', minWidth: 170 },
     {
       id: 'units',

@@ -245,7 +245,7 @@ const Supplier: React.FC = () => {
         style={{ marginBottom: 9 }}
       >
         <Typography variant="h5" gutterBottom>
-          Dalabadaadkaaga
+          Orders
         </Typography>
         <Button
           variant="contained"

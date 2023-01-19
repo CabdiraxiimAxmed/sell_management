@@ -1,17 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import Header, { DrawerHeader } from './Header';
-import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 import { styled, alpha } from '@mui/material/styles'
 import { ToastContainer, toast } from 'react-toastify';
-import { Box, Stack, Typography, Button, MenuItem, Avatar, List, ListItem, ListItemAvatar, ListItemText, DialogTitle, Dialog, TextField, Autocomplete } from '@mui/material';
+import {
+  Stack,
+  Typography,
+  Button,
+  MenuItem,
+  Paper,
+  TablePagination,
+  Table,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from '@mui/material';
 import Menu, { MenuProps } from '@mui/material/Menu';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BoltIcon from '@mui/icons-material/Bolt';
-import PersonIcon from '@mui/icons-material/Person';
-import { blue } from '@mui/material/colors';
 import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Divider from '@mui/material/Divider';
@@ -21,15 +30,15 @@ import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 
 type SellType = {
-    order_id: string,
-    customer: string,
-    sold_by: string,
-    is_debt: boolean,
-    discount: string,
-    total: string,
-    paid: string,
-    created_date: string
-  };
+  order_id: string,
+  customer: string,
+  sold_by: string,
+  is_debt: boolean,
+  discount: string,
+  total: string,
+  paid: string,
+  created_date: string
+};
 type ColumnDisplayType = {
   order_id: boolean,
   customer: boolean,
@@ -41,9 +50,25 @@ type ColumnDisplayType = {
   created_date: boolean
 };
 
+interface Columns {
+  id:
+  | 'order_id'
+  | 'customer'
+  | 'sold_by'
+  | 'discount'
+  | 'total'
+  | 'paid'
+  | 'created_date';
+  label: string;
+  minWidth?: number;
+  align?: 'right';
+  format?: (value: number) => string;
+}
+
 const SellsList: React.FC = () => {
-  console.log('inside sell list');
   const navigate = useNavigate();
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sells, setSells] = useState<SellType[]>([
     {
       order_id: '',
@@ -78,15 +103,49 @@ const SellsList: React.FC = () => {
     paid: true,
     created_date: true
   });
+
+  const columns: readonly Columns[] = [
+    { id: 'order_id', label: 'id', minWidth: 100, align: 'right' },
+    { id: 'customer', label: 'Customer', minWidth: 170 },
+    { id: 'sold_by', label: 'sold_by', minWidth: 170 },
+    {
+      id: 'total',
+      label: 'total',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => `$${value.toLocaleString('en-US')}`,
+    },
+    {
+      id: 'discount',
+      label: 'discount',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => value.toLocaleString('en-US'),
+    },
+    {
+      id: 'paid',
+      label: 'paid',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => `$${value.toLocaleString('en-US')}`,
+    },
+    {
+      id: 'created_date',
+      label: 'created_date',
+      minWidth: 100,
+      align: 'right',
+    },
+  ];
+
   useEffect(() => {
-    axios.get('/sell/sells')
-         .then(res => {
-           setSells(res.data);
-           setSellsStore(res.data);
-         })
-         .catch(err => {
-           toast.error('qalad ayaa dhacay');
-         })
+    axios.get('http://localhost:2312/sell/sells')
+      .then(res => {
+        setSells(res.data);
+        setSellsStore(res.data);
+      })
+      .catch(error => {
+        toast.error(error.message);
+      })
   }, [])
 
   const handleClick = (e: React.ChangeEvent<HTMLInputElement>) => { // change function name
@@ -99,7 +158,7 @@ const SellsList: React.FC = () => {
   const handleDebtStatus = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.name;
     const checked = e.target.checked;
-    if(name == 'deyn-ku-maqan' && checked) {
+    if (name == 'deyn-ku-maqan' && checked) {
       const filtered = sellsStore.filter((sell: SellType) => {
         return parseFloat(sell.paid) < parseFloat(sell.total);
       })
@@ -126,6 +185,9 @@ const SellsList: React.FC = () => {
 
   const goOrderPaper = (id: string) => {
     navigate(`/sells/${id}`)
+  };
+  const customerPage = (customer: string) => {
+    navigate(`/customer-info/${customer}`)
   };
 
   const filterOrders = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,84 +217,140 @@ const SellsList: React.FC = () => {
     return columnDisplay[column_head as keyof ColumnDisplayType];
   }
 
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
   return (
     <>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5} style={{marginBottom : 9}}>
-          <Typography variant="h5" gutterBottom>
-            Alaab gadmatay
-          </Typography>
-          <Button variant="contained" onClick={() => navigate('/sells')} startIcon={<AddIcon />} style={{backgroundColor:"#2367d1", fontWeight: 'bold'}}>
-            Dalab
-          </Button>
-        </Stack>
-  <div className="container">
-      <div className="search-filters-container">
-        <input placeholder="search" className="search" onChange={filterOrders}/>
-        <div className="filters-container">
-          <div className="dropdown">
-            <button className="dropBtn"><BoltIcon/> xaladda</button>
-            <div className="dropdown-content">
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  name='deyn-ku-maqan'
-                  className="checkbox"
-                  onChange={handleDebtStatus}
-                />
-                <span>deyn ku maqan</span>
-              </label>
-            </div>
-          </div>
-          <div className="dropdown">
-            <button className="dropBtn"><ViewWeekIcon/> columns</button>
-            <div className="dropdown-content">
-              {Object.keys(sells[0]).map((column_head: string, index: number) => (
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5} style={{ marginBottom: 9 }}>
+        <Typography variant="h5" gutterBottom>
+          Sell order list
+        </Typography>
+        <Button variant="contained" onClick={() => navigate('/sell')} startIcon={<AddIcon />} style={{ backgroundColor: "#2367d1", fontWeight: 'bold' }}>
+          Sell Order
+        </Button>
+      </Stack>
+      <div className="container">
+        <div className="search-filters-container">
+          <input placeholder="search" className="search" onChange={filterOrders} />
+          <div className="filters-container">
+            <div className="dropdown">
+              <button className="dropBtn"><BoltIcon /> xaladda</button>
+              <div className="dropdown-content">
                 <label className="switch">
                   <input
                     type="checkbox"
-                    name={column_head}
+                    name='deyn-ku-maqan'
                     className="checkbox"
-                    onChange={handleClick}
-                  checked={columnDisplay[column_head as keyof ColumnDisplayType]}
+                    onChange={handleDebtStatus}
                   />
-                  <span>{column_head}</span>
+                  <span>deyn ku maqan</span>
                 </label>
-              ))}
+              </div>
             </div>
+            <div className="dropdown">
+              <button className="dropBtn"><ViewWeekIcon /> columns</button>
+              <div className="dropdown-content">
+                {Object.keys(sells[0]).map((column_head: string, index: number) => (
+                  <label key={index} className="switch">
+                    <input
+                      type="checkbox"
+                      name={column_head}
+                      className="checkbox"
+                      onChange={handleClick}
+                      checked={columnDisplay[column_head as keyof ColumnDisplayType]}
+                    />
+                    <span>{column_head}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <button className="dropBtn"><DownloadIcon /> export</button>
           </div>
-    <button className="dropBtn"><DownloadIcon/> export</button>
         </div>
+        {/* table goes here */}
+        <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
+          <TableContainer sx={{ minHeight: 440, transform: 'translateY(-30px)' }}
+          >
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  {columns.map(column => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{
+                        minWidth: column.minWidth,
+                        backgroundColor: 'black',
+                        color: 'white',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
+                  <TableCell
+                    align="left"
+                    style={{
+                      minWidth: 170,
+                      backgroundColor: 'black',
+                      color: 'white',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sells
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row: SellType, index: number) => (
+                    <TableRow
+                      hover
+                      role="row"
+                      tabIndex={-1}
+                      key={index}
+                    >
+                      <TableCell
+                        className='table-cell'
+                        align="right">
+                        <Button
+                          onClick={() => goOrderPaper(row.order_id)}
+                          variant='text'>{row.order_id}</Button>
+                      </TableCell>
+                      <TableCell className='table-cell'><Button onClick={() => customerPage(row.customer)} variant='text'>{row.customer}</Button></TableCell>
+                      <TableCell className='table-cell'> {row.sold_by} </TableCell>
+                      <TableCell className='table-cell' align="right"> $ {row.total} </TableCell>
+                      <TableCell className='table-cell' align="right"> $ {row.discount} </TableCell>
+                      <TableCell className='table-cell' align="right"> $ {row.paid} </TableCell>
+                      <TableCell className='table-cell' align="right">{row.created_date} </TableCell>
+                      <TableCell className='table-cell'>
+                        <SellMenuButton order_id={row.order_id} is_debt={row.is_debt} total={row.total} paid={row.paid} customer={row.customer} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 100]}
+              component="div"
+              count={sells.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableContainer>
+        </Paper>
       </div>
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              {Object.keys(sells[0]).map((column_head, index) => (
-                <th className={display(column_head)? '': 'inactive'}>{column_head}</th>
-              ))}
-            </tr>
-          </thead>
-
-          {sells.map((sell, index) => (
-            <tbody>
-              <tr>
-                <td className={display('order_id')? '': 'inactive'}><Button variant="text" onClick={() => goOrderPaper(sell.order_id) }>{sell.order_id}</Button></td>
-                <td className={display('customer')? '': 'inactive'}>{sell.customer}</td>
-                <td className={display('sold_by')? '': 'inactive'}>{sell.sold_by}</td>
-                <td className={display('is_debt')? '': 'inactive'}>{sell.is_debt? 'true' : 'false'}</td>
-                <td className={display('discount')? '': 'inactive'}>${sell.discount}</td>
-                <td className={display('total')? '': 'inactive'}>${sell.total}</td>
-                <td className={display('paid')? '': 'inactive'}>${sell.paid}</td>
-                <td className={display('created_date')? '': 'inactive'}>{sell.created_date}</td>
-                <td>
-                  <SellMenuButton order_id={sell.order_id} total={sell.total} paid={sell.paid} is_debt={sell.is_debt} customer={sell.customer} />
-                </td>
-              </tr>
-            </tbody>
-          ))}
-        </table>
-      </div>
-    </div>
 
     </>
   );
@@ -287,9 +405,7 @@ type SellMenuButtonType = {
   is_debt: boolean,
   customer: string,
 }
-const SellMenuButton:React.FC<SellMenuButtonType> = ({ order_id, total, paid, is_debt, customer }) => {
-  const [open, setOpen] = useState<boolean>(false);
-  const [selectedValue, setSelectedValue] = useState<number>(0);
+const SellMenuButton: React.FC<SellMenuButtonType> = ({ order_id, total, paid, is_debt, customer }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isOpen = Boolean(anchorEl);
@@ -302,36 +418,39 @@ const SellMenuButton:React.FC<SellMenuButtonType> = ({ order_id, total, paid, is
   const isDisabled = () => {
     let paidAmount: number = parseFloat(paid)
     let totalAmount: number = parseFloat(total)
-    if(paidAmount >= totalAmount) return true;
+    if (paidAmount >= totalAmount) return true;
     return false;
   }
 
   const handleClose = (page: string) => {
-    if(page == 'pay'){
-      setOpen(true);
-    }else if(page == 'edit'){
-      navigate(`/purchase/edit/${order_id}`);
+    let recorded_date = moment().format('MMMM Do YYYY, h:mm:ss a');
+    if (page == 'paid') {
+      let payments = {recorded_date, paid_amount: total};
+      axios.post('http://localhost:2312/sell/pay', { order_id, paidAmount: total, customer, payments, is_debt })
+        .then(resp => {
+          if (resp.data === 'success') toast.success("success");
+          else if (resp.data === 'error') toast.error("server error");
+        })
+        .catch(error => {
+          toast.error(error.message);
+        });
     } else if (page == 'delete') {
-      axios.post(`/purchase/delete/${order_id}`)
-           .then(res => {
-             if(res.data === 'success') {
-               toast.success('waa lagu guuleystay');
-               navigate('/orders');
-             } else if (res.data === 'error') {
-               toast.error('SERVER: qalad ayaa dhacay');
-             }
-           })
-           .catch(err => {
-             toast.error('qalad ayaa dhacay');
-           })
+      axios.post(`http://localhost:2312/purchase/delete/${order_id}`)
+        .then(res => {
+          if (res.data === 'success') {
+            toast.success('success');
+            navigate('/orders');
+          } else if (res.data === 'error') {
+            toast.error('SERVER: qalad ayaa dhacay');
+          }
+        })
+        .catch(error => {
+          toast.error(error.message);
+        })
     };
     setAnchorEl(null);
   };
 
-  const handleClickClose = (value: number) => {
-    setOpen(false);
-    setSelectedValue(value);
-  };
 
   return (
     <div>
@@ -347,16 +466,6 @@ const SellMenuButton:React.FC<SellMenuButtonType> = ({ order_id, total, paid, is
         pauseOnHover
         theme="dark"
       />
-      <Payment
-        selectedValue={selectedValue}
-        open={open}
-        onClose={handleClickClose}
-        paid={paid}
-        total={total}
-        is_debt={is_debt}
-        order_id={order_id}
-        customer={customer}
-      />
       <IconButton color="primary" onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>
@@ -369,105 +478,17 @@ const SellMenuButton:React.FC<SellMenuButtonType> = ({ order_id, total, paid, is
         open={isOpen}
         onClose={handleClose}
       >
-        <MenuItem onClick={() => handleClose('pay') } disableRipple disabled={isDisabled()}>
+        <MenuItem onClick={() => handleClose('paid')} disableRipple disabled={isDisabled()}>
           <AttachMoneyIcon />
           bixi lacag
         </MenuItem>
-        <MenuItem onClick={() => handleClose('edit') } disableRipple>
-          <EditIcon />
-          Edit
-        </MenuItem>
         <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={() => handleClose('delete') } disableRipple sx={{color: 'red'}}>
-          <DeleteIcon style={{color: 'red'}}/>
+        <MenuItem onClick={() => handleClose('delete')} disableRipple sx={{ color: 'red' }}>
+          <DeleteIcon style={{ color: 'red' }} />
           Tir
         </MenuItem>
       </StyledMenu>
     </div>
-  );
-}
-/* payment section */
-
-interface PaymentProps {
-  open: boolean;
-  selectedValue: number;
-  onClose: (value: number) => void;
-  paid: string;
-  total: string;
-  is_debt: boolean;
-  order_id: string;
-  customer: string,
-}
-
-function Payment(props: PaymentProps) {
-  const navigate = useNavigate();
-  const { onClose, selectedValue, open, paid, total, is_debt, order_id, customer } = props;
-  let paidAmount: number = parseFloat(paid);
-  const [customerPaid, setCustomerPaid] = useState<number>(0);
-
-  const sendPaymentData = () => {
-    let recordedDate = moment().format('MMMM Do YYYY, h:mm:ss a');
-    let paidAmount: number = parseFloat(paid) + customerPaid;
-    let totalAmount: number = parseFloat(total)
-    let payments: {paidAmount: number, recordedDate: string}[] = [{ paidAmount: customerPaid, recordedDate }];
-    if (customerPaid < 1) {
-      toast.warn('lacagtu wey yartahay');
-      return;
-    } else if(!customerPaid) {
-      toast.warn('fadlan geli lacagta');
-      return;
-    } else if (customerPaid > totalAmount) {
-      toast.warn('lacagtu wey badantahay');
-      return;
-    }
-    axios.post('/sell/pay-sell-debt', {customerPaid, paidAmount, payments, total, order_id, customer})
-         .then(res => {
-           if(res.data == 'success') {
-             toast.success('waa lagu guuleystay');
-           } else if (res.data === 'error') {
-             toast.error('SERVER: qalad ayaa dhacay');
-           }
-         })
-         .catch(err => {
-           toast.error('qalad ayaa dhacay');
-         });
-  }
-
-  const handleClose = () => {
-    onClose(selectedValue);
-  };
-
-
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomerPaid(parseFloat(e.target.value));
-  }
-
-  const handleListItemClick = (value: string) => {
-    sendPaymentData();
-    onClose(customerPaid);
-  };
-
-
-  return (
-    <Dialog onClose={handleClose} open={open}>
-      <DialogTitle>Lacag bixinta</DialogTitle>
-      <List sx={{ pt: 0 }}>
-        <ListItem>
-          <ListItem>
-            <TextField
-              required
-              size="small"
-              label="qiimaha"
-              type="number"
-              onChange={handlePriceChange}
-            />
-          </ListItem>
-        </ListItem>
-        <ListItem autoFocus button onClick={() => handleListItemClick('addAccount')}>
-          <Button variant="contained" color="primary">submit</Button>
-        </ListItem>
-      </List>
-    </Dialog>
   );
 }
 

@@ -140,7 +140,7 @@ router.post('/purchase-order', async (req, res) => {
   // const order_id = orderid.generate();
   let formatItemArray = JSON.stringify(items);
   try {
-    let resp = await client.query(
+    await client.query(
       `INSERT INTO purchase_order ( supplier, purchase_date, purchase_status, business_location, items, whole_discount, total ) VALUES( '${supplier}', '${purchaseDate}', '${purchase_status}', '${businessLocation}', array['${formatItemArray}']::json[], '${wholeDiscount}', '${total}' )`
     );
     res.send('success');
@@ -155,7 +155,7 @@ router.post('/received', async (req, res) => {
   try {
     for (let item of items) {
       await client.query(
-        `UPDATE products set units=units+'${item.itemQuantity}' WHERE name='${item.name}'`
+        `UPDATE product set units=units+'${item.itemQuantity}' WHERE name='${item.name}'`
       );
     }
     await client.query(
