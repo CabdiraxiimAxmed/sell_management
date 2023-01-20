@@ -74,12 +74,14 @@ router.post('/purchase/date', async(req, res) => {
       let day = dateOrdinal(i);
       let date = `${splitted[0]} ${day} ${splitted[1]}`;
 
-      const resp = await client.query(`SELECT supplier, amount, recordeddate FROM purch_debt WHERE recordeddate LIKE '%${date}%' AND is_paid='${false}'`);
+      const resp = await client.query(`SELECT supplier, initial_amount, recorded_date FROM purchase_debt WHERE recorded_date LIKE '%${date}%' AND is_paid='${false}'`);
       if(resp.rows.length === 0) continue;
+      console.log('this')
+      console.log(resp.rows);
       result.push(...resp.rows);
     }
     if(result.length == 0) {
-      result = [{order_id: "", paid: 0, total: 0, created_date: ''}];
+      result = [{id: "", paid: 0, total: 0, recorded_date: ''}];
     }
     res.send(result);
   } catch(err) {

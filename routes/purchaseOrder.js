@@ -83,18 +83,18 @@ router.get('/orders/:order_id', async (req, res) => {
 router.post('/expense', async (req, res) => {
   let { dateStr } = req.body;
   let daysNo = {
-    01: 31,
-    02: 29,
-    03: 31,
-    04: 30,
-    05: 31,
-    06: 30,
-    07: 31,
-    08: 31,
-    09: 30,
-    10: 31,
-    11: 30,
-    12: 31,
+    '01': 31,
+    '02': 29,
+    '03': 31,
+    '04': 30,
+    '05': 31,
+    '06': 30,
+    '07': 31,
+    '08': 31,
+    '09': 30,
+    '10': 31,
+    '11': 30,
+    '12': 31,
   };
 
   try {
@@ -106,17 +106,19 @@ router.post('/expense', async (req, res) => {
       return;
     }
     const days = daysNo[splitted[0]];
+    console.log({ splitted, days });
     let result = [];
     for (let i = 1; i <= days; i++) {
       let day = i < 10 ? `0${i}` : i;
       let date = `${splitted[1]}-${splitted[0]}-${day}`;
       const resp = await client.query(
-        `SELECT order_id, paid, total, order_date FROM purchase_order WHERE order_date::text LIKE '%${date}%'`
+        `SELECT id, paid, total, purchase_date FROM purchase_order WHERE purchase_date::text LIKE '%${date}%'`
       );
       if (resp.rows.length === 0) continue;
       result.push(...resp.rows);
     }
     if (result.length == 0) {
+      console.log('no data');
       result = [{ order_id: '', paid: '', total: '', order_date: '' }];
     }
     res.send(result);
@@ -267,7 +269,7 @@ router.post('/get-debt-transaction', async (req, res) => {
   const { order_id } = req.body;
   try {
     const resp = await client.query(
-      `SELECT * FROM purch_debt WHERE order_id='${order_id}'`
+      `SELECT * FROM purchase_debt WHERE order_id='${order_id}'`
     );
     if (resp.rows.length === 0) {
       let result = [
@@ -275,12 +277,7 @@ router.post('/get-debt-transaction', async (req, res) => {
           id: 0,
           amount: '',
           order_id: '',
-          payments: [
-            {
-              recordedDate: '',
-              paidAmount: 0,
-            },
-          ],
+          payments: { recordedDate: '', paidAmount: 0 },
           is_paid: false,
           recordeddate: '',
           supplier: '',

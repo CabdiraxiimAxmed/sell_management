@@ -2,15 +2,11 @@ import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import {
-  Box,
   Typography,
   TextField,
   IconButton,
   Button,
   Grid,
-  AppBar,
-  Container,
-  Toolbar,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import moment from "moment";
@@ -24,10 +20,10 @@ type RevenueType = {
 };
 
 type ExpenseType = {
-  order_id: string;
+  id: string;
   paid: string;
   total: string;
-  order_date: string;
+  purchase_date: string;
 };
 type CustomerDebtType = {
   customer: string;
@@ -36,8 +32,8 @@ type CustomerDebtType = {
 };
 type SupplierDebtType = {
   supplier: string;
-  amount: string;
-  recordeddate: string;
+  initial_amount: string;
+  recorded_date: string;
 };
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -48,13 +44,13 @@ const Home: React.FC = () => {
     { order_id: "", paid: "", total: "", created_date: "" },
   ]);
   const [expenses, setExpenses] = useState<ExpenseType[]>([
-    { order_id: "", paid: "", total: "", order_date: "" },
+    { id: "", paid: "", total: "", purchase_date: "" },
   ]);
   const [customerDebts, setCustomerDebts] = useState<CustomerDebtType[]>([
     { customer: "", amount: "", recordeddate: "" },
   ]);
   const [supplierDebts, setSupplierDebts] = useState<SupplierDebtType[]>([
-    { supplier: "", amount: "", recordeddate: "" },
+    { supplier: "", initial_amount: "", recorded_date: "" },
   ]);
   const [monthRevenue, setMonthRevenue] = useState<string>(currentMonth);
   const [monthCustomerDebt, setMonthCustomerDebt] =
@@ -67,45 +63,62 @@ const Home: React.FC = () => {
   const [dateCustomerDebt, setDateCustomerDebt] = useState<string>("");
   const [dateSupplierDebt, setDateSupplierDebt] = useState<string>("");
  useEffect(() => {
-    axios.post("/sell/revenue", { dateStr: monthRevenue }).then((res) => {
+    axios.post("http://localhost:2312/sell/revenue", { dateStr: monthRevenue }).then((res) => {
       if (res.data == "error") {
         toast.error("SERVER: qalad ayaa dhacay");
         return;
       }
       setRevenues(res.data);
-    });
+    })
+    .catch(error => {
+        toast.error(error.message)
+      })
 
     axios
-      .post("/debt/sells/date", { dateStr: monthCustomerDebt })
+      .post("http://localhost:2312/debt/sells/date", { dateStr: monthCustomerDebt })
       .then((res) => {
         if (res.data == "error") {
           toast.error("SERVER: qalad ayaa dhacay");
           return;
         }
         setCustomerDebts(res.data);
-      });
+      })
+      .catch(error => {
+        toast.error(error.message);
+      })
 
     axios
-      .post("/debt/purchase/date", { dateStr: monthSupplierDebt })
+      .post("http://localhost:2312/debt/purchase/date", { dateStr: monthSupplierDebt })
       .then((res) => {
         if (res.data == "error") {
           toast.error("SERVER: qalad ayaa dhacay");
           return;
+
         }
         setSupplierDebts(res.data);
-      });
+      })
+      .catch(error => {
+        toast.error(error.message)
+      })
 
-    axios.post("/purchase/expense", { dateStr: monthExpense }).then((res) => {
+    axios.post("http://localhost:2312/purchase/expense", { dateStr: monthExpense }).then((res) => {
       if (res.data == "error") {
         toast.error("SERVER: qalad ayaa dhacay");
         return;
       }
       setExpenses(res.data);
-    });
+    })
+    .catch(error => {
+      toast.error(error.message);
+    })
   }, []);
 
   const getRest = (total: string, paid: string) => {
-    return parseFloat(total) - parseFloat(paid);
+    let totalAmount: number = parseFloat(total);
+    let paidAmount: number = parseFloat(paid);
+    if (isNaN(totalAmount))totalAmount = 0;
+    if (isNaN(paidAmount)) paidAmount = 0;
+    return totalAmount - paidAmount;
   };
 
   const goSellPaper = (id: string) => {
@@ -120,23 +133,31 @@ const Home: React.FC = () => {
     navigate(`/customer-info/${name}`);
   };
 
-  const getTotal = (term: string) => {
+  const getTotal = () => {
     let totalRevenue: number = 0;
     let paidRevenue: number = 0;
     let totalExpense: number = 0;
     let paidExpense: number = 0;
     for (let revenue of revenues) {
-      totalRevenue += parseFloat(revenue.total);
+      let rev = parseFloat(revenue.total);
+      if (!rev) rev = 0;
+      totalRevenue += Math.floor(rev * 100) / 100;
     }
     for (let revenue of revenues) {
-      paidRevenue += parseFloat(revenue.paid);
+      let rev = parseFloat(revenue.paid);
+      if (!rev) rev = 0;
+      paidRevenue += Math.floor(rev * 100) / 100;
     }
 
     for (let expense of expenses) {
-      totalExpense += parseFloat(expense.total);
+      let exp = parseFloat(expense.total);
+      if (!exp) exp = 0
+      totalExpense += Math.floor(exp * 100) / 100;
     }
     for (let expense of expenses) {
-      paidExpense += parseFloat(expense.paid);
+      let exp: number =  parseFloat(expense.paid);
+      if (!exp) exp = 0;
+      paidExpense += Math.floor(exp * 100) / 100;
     }
     return { totalRevenue, paidRevenue, totalExpense, paidExpense };
   };
@@ -145,7 +166,7 @@ const Home: React.FC = () => {
     setDateRevenue(e.target.value);
   };
   const getRevenueByDate = () => {
-    axios.post("/sell/revenue", { dateStr: dateRevenue }).then((res) => {
+    axios.post("http://localhost:2312/sell/revenue", { dateStr: dateRevenue }).then((res) => {
       if (res.data == "error") {
         toast.error("SERVER: qalad ayaa dhacay");
         return;
@@ -156,12 +177,14 @@ const Home: React.FC = () => {
       }
       setRevenues(res.data);
       setMonthRevenue(dateRevenue);
+    }).catch(error => {
+      toast.error(error.message);
     });
   };
 
   const getCustomerDebtByDate = () => {
     axios
-      .post("/debt/sells/date", { dateStr: dateCustomerDebt })
+      .post("http://localhost:2312/debt/sells/date", { dateStr: dateCustomerDebt })
       .then((res) => {
         if (res.data == "error") {
           toast.error("SERVER: qalad ayaa dhacay");
@@ -173,12 +196,14 @@ const Home: React.FC = () => {
         }
         setCustomerDebts(res.data);
         setMonthCustomerDebt(dateCustomerDebt);
+      }).catch(error => {
+        toast.error(error.message);
       });
   };
 
   const getSupplierDebtByDate = () => {
     axios
-      .post("/debt/purchase/date", { dateStr: dateSupplierDebt })
+      .post("http://localhost:2312/debt/purchase/date", { dateStr: dateSupplierDebt })
       .then((res) => {
         if (res.data == "error") {
           toast.error("SERVER: qalad ayaa dhacay");
@@ -190,11 +215,13 @@ const Home: React.FC = () => {
         }
         setSupplierDebts(res.data);
         setMonthSupplierDebt(dateSupplierDebt);
+      }).catch(error => {
+        toast.error(error.message);
       });
   };
 
   const getExpenseByDate = () => {
-    axios.post("/purchase/expense", { dateStr: dateExpense }).then((res) => {
+    axios.post("http://localhost:2312/purchase/expense", { dateStr: dateExpense }).then((res) => {
       if (res.data == "error") {
         toast.error("SERVER: qalad ayaa dhacay");
         return;
@@ -205,6 +232,8 @@ const Home: React.FC = () => {
       }
       setExpenses(res.data);
       setMonthExpense(dateExpense);
+    }).catch(error => {
+      toast.error(error.message);
     });
   };
 
@@ -219,7 +248,7 @@ const Home: React.FC = () => {
   const getSupplierDebtTotal = () => {
     let total: number = 0;
     for (let debt of supplierDebts) {
-      total += parseFloat(debt.amount);
+      total += parseFloat(debt.initial_amount);
     }
     return total;
   };
@@ -242,7 +271,7 @@ const Home: React.FC = () => {
       <Grid item xs={6}>
         <div className="report-display-container">
           <Typography variant="body1">
-            Daqliga kuso galay {monthRevenue}
+            Revenue: {monthRevenue}
           </Typography>
           <TextField
             InputProps={{ sx: { height: 34 } }}
@@ -290,15 +319,15 @@ const Home: React.FC = () => {
                   <tr>
                     <td style={{ fontWeight: "bold" }}>total</td>
                     <td style={{ fontWeight: "bold" }}>
-                      ${getTotal("paid").paidRevenue}
+                      ${getTotal().paidRevenue}
                     </td>
                     <td style={{ fontWeight: "bold" }}>
-                      ${getTotal("paid").totalRevenue}
+                      ${getTotal().totalRevenue}
                     </td>
                     <td style={{ fontWeight: "bold" }}>
                       $
-                      {getTotal("paid").totalRevenue -
-                        getTotal("paid").paidRevenue}
+                      {getTotal().totalRevenue -
+                        getTotal().paidRevenue}
                     </td>
                   </tr>
                 </tbody>
@@ -310,7 +339,7 @@ const Home: React.FC = () => {
 
       <Grid item xs={6}>
         <div className="report-display-container">
-          <Typography variant="body1">dayntaada {monthCustomerDebt}</Typography>
+          <Typography variant="body1">your debt: {monthCustomerDebt}</Typography>
           <TextField
             InputProps={{ sx: { height: 34 } }}
             onChange={(e) => setDateCustomerDebt(e.target.value)}
@@ -366,7 +395,7 @@ const Home: React.FC = () => {
       <Grid item xs={6}>
         <div className="report-display-container">
           <Typography variant="body1">
-            Daqliga kaa baxay {monthExpense}
+            Expenses {monthExpense}
           </Typography>
           <TextField
             InputProps={{ sx: { height: 34 } }}
@@ -384,10 +413,10 @@ const Home: React.FC = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>order_id</th>
+                    <th>id</th>
                     <th>paid</th>
                     <th>total</th>
-                    <th>pending</th>
+                    <th>rest</th>
                     <th>order_date</th>
                   </tr>
                 </thead>
@@ -398,15 +427,15 @@ const Home: React.FC = () => {
                         {" "}
                         <Button
                           variant="text"
-                          onClick={() => goPurchasePaper(expense.order_id)}
+                          onClick={() => goPurchasePaper(expense.id)}
                         >
-                          {expense.order_id}
+                          {expense.id}
                         </Button>
                       </td>
                       <td>${expense.paid}</td>
                       <td>${expense.total}</td>
                       <td>${getRest(expense.total, expense.paid)}</td>
-                      <td>{expense.order_date}</td>
+                      <td>{expense.purchase_date}</td>
                     </tr>
                   </tbody>
                 ))}
@@ -414,15 +443,14 @@ const Home: React.FC = () => {
                   <tr>
                     <td style={{ fontWeight: "bold" }}>total</td>
                     <td style={{ fontWeight: "bold" }}>
-                      ${getTotal("paid").paidExpense}
+                      ${getTotal().paidExpense}
                     </td>
                     <td style={{ fontWeight: "bold" }}>
-                      ${getTotal("paid").totalExpense}
+                      ${getTotal().totalExpense}
                     </td>
                     <td style={{ fontWeight: "bold" }}>
                       $
-                      {getTotal("paid").totalExpense -
-                        getTotal("paid").paidExpense}
+                      {Math.floor((getTotal().totalExpense - getTotal().paidExpense) * 100) / 100}
                     </td>
                   </tr>
                 </tbody>
@@ -472,8 +500,8 @@ const Home: React.FC = () => {
                           {debt.supplier}
                         </Button>
                       </td>
-                      <td>${debt.amount}</td>
-                      <td>${debt.recordeddate}</td>
+                      <td>${debt.initial_amount}</td>
+                      <td>${debt.recorded_date}</td>
                     </tr>
                   </tbody>
                 ))}
