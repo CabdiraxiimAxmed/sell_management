@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
 router.get('/orders', async (req, res) => {
   try {
     const resp = await client.query(
-      'SELECT id, supplier, purchase_date,  purchase_status, total, whole_discount, paid FROM purchase_order'
+      'SELECT id, supplier, purchase_date,  purchase_status, is_debt, total, whole_discount, paid FROM purchase_order'
     );
     if (resp.rows.length === 0) {
       let result = [
@@ -98,7 +98,7 @@ router.post('/expense', async (req, res) => {
   };
 
   try {
-    let splitted = dateStr.split(/(\s+)/).filter(function (e) {
+    let splitted = dateStr.split(/(\s+)/).filter(function(e) {
       return e.trim().length > 0;
     });
     if (splitted.length < 2 || splitted.length > 2) {
@@ -140,6 +140,13 @@ router.post('/purchase-order', async (req, res) => {
   // const order_id = orderid.generate();
   let formatItemArray = JSON.stringify(items);
   try {
+    if (purchase_status === 'received') {
+      for (let item of items) {
+        await client.query(
+          `UPDATE products set units=units+'${item.itemQuantity}' WHERE name='${item.name}'`
+        );
+      }
+    }
     await client.query(
       `INSERT INTO purchase_order ( supplier, purchase_date, purchase_status, business_location, items, whole_discount, total ) VALUES( '${supplier}', '${purchaseDate}', '${purchase_status}', '${businessLocation}', array['${formatItemArray}']::json[], '${wholeDiscount}', '${total}' )`
     );
@@ -150,12 +157,27 @@ router.post('/purchase-order', async (req, res) => {
   }
 });
 
+router.post('/debt', async (req, res) => {
+  let { order_id, supplier, recorded_date, amount, initial_amount, is_paid } = req.body;
+  initial_amount = parseFloat(initial_amount);
+  try {
+    await client.query(`INSERT INTO purchase_debt(order_id, supplier, recorded_date, amount, initial_amount, is_paid) 
+      VALUES('${order_id}', '${supplier}', '${recorded_date}', '${amount}', '${initial_amount}', '${is_paid}' )
+      `)
+    await client.query(`UPDATE purchase_order set is_debt='${true}' WHERE id='${order_id}'`)
+    res.send('success')
+  } catch (err) {
+    console.log(err);
+    res.send("error");
+  }
+});
+
 router.post('/received', async (req, res) => {
   const { id, items, status } = req.body;
   try {
     for (let item of items) {
       await client.query(
-        `UPDATE product set units=units+'${item.itemQuantity}' WHERE name='${item.name}'`
+        `UPDATE products set units=units+'${item.itemQuantity}' WHERE name='${item.name}'`
       );
     }
     await client.query(
@@ -170,13 +192,22 @@ router.post('/received', async (req, res) => {
 
 
 router.post('/payment', async (req, res) => {
-  let { id, paid } = req.body;
-  console.log({ id, paid });
+  let { id, paid, is_debt, payments } = req.body;
+  let formatPayments = JSON.stringify(payments);
   paid = parseFloat(paid);
   try {
-    await client.query(`UPDATE purchase_order set paid='${paid}' WHERE id='${id}'`)
+    if(is_debt) {
+      await client.query(`UPDATE purchase_debt 
+        SET amount='${paid}',
+        payments='${formatPayments}',
+        is_paid='${true}'
+        WHERE id='${3}'
+        `);
+      await client.query(`UPDATE purchase_order set paid='${paid}' WHERE id='${id}'`)
+    } else
+      await client.query(`UPDATE purchase_order set paid='${paid}' WHERE id='${id}'`)
     res.send('success');
-  }catch(err) {
+  } catch (err) {
     console.log(err);
     res.send("error");
   }
@@ -186,8 +217,6 @@ router.post('/edit', (req, res) => {
   let {
     supplier,
     status,
-    orderDate,
-    deliveryDate,
     items,
     discount,
     taxAmount,

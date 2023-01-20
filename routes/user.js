@@ -86,7 +86,7 @@ router.post('/update-user', async (req, res) => {
   let permissionJson = JSON.stringify(permissions);
   let hash = CryptoJS.AES.encrypt(password, 'ahmed').toString();
   try {
-    const resp = await client.query(
+      await client.query(
       `UPDATE user_info SET name='${name}', username='${username}', role='${role}', contact='${contact}', password='${hash}', permissions=array['${permissionJson}']::json[] WHERE id='${id}'`
     );
     res.send('success');
@@ -99,7 +99,7 @@ router.post('/update-user', async (req, res) => {
 router.post('/delete/:username', async (req, res) => {
   const { username } = req.params;
   try {
-    const resp = await client.query(
+    await client.query(
       `DELETE FROM user_info WHERE username='${username}'`
     );
     res.send('success');

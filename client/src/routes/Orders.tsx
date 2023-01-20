@@ -23,16 +23,19 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import PaidIcon from '@mui/icons-material/Paid';
 import { IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ChangePurchaseStatus from '../components/ChangePurchaseStatus';
 import axios from 'axios';
+import moment from 'moment';
 
 type OrderType = {
   id: number;
   supplier: string;
   purchase_date: string;
   purchase_status: string;
+  is_debt: boolean;
   total: string;
   whole_discount: string;
   paid: string;
@@ -43,6 +46,7 @@ interface Columns {
   | 'supplier'
   | 'purchase_date'
   | 'purchase_status'
+  | 'is_debt'
   | 'total'
   | 'whole_discount'
   | 'paid';
@@ -62,6 +66,7 @@ const Supplier: React.FC = () => {
       supplier: '',
       purchase_date: '',
       purchase_status: '',
+      is_debt: false,
       total: '',
       whole_discount: '',
       paid: '',
@@ -73,6 +78,7 @@ const Supplier: React.FC = () => {
       supplier: '',
       purchase_date: '',
       purchase_status: '',
+      is_debt: false,
       total: '',
       whole_discount: '',
       paid: '',
@@ -97,6 +103,7 @@ const Supplier: React.FC = () => {
     { id: 'supplier', label: 'Supplier', minWidth: 170 },
     { id: 'purchase_date', label: 'purchase_date', minWidth: 170 },
     { id: 'purchase_status', label: 'purchase_status', minWidth: 170 },
+    { id: 'is_debt', label: 'is_debt', minWidth: 170, align: 'right' },
     {
       id: 'total',
       label: 'total',
@@ -149,6 +156,7 @@ const Supplier: React.FC = () => {
             supplier: '',
             purchase_date: '',
             purchase_status: '',
+            is_debt: false,
             total: '',
             whole_discount: '',
             paid: '',
@@ -174,6 +182,7 @@ const Supplier: React.FC = () => {
           supplier: '',
           purchase_date: '',
           purchase_status: '',
+          is_debt: false,
           total: '',
           whole_discount: '',
           paid: '',
@@ -185,7 +194,7 @@ const Supplier: React.FC = () => {
   };
 
   const handlePurchaseStatus = (e: any, id: number, status: string) => {
-    if (status === 'pending')
+    if (status === 'ordered')
       setPurchaseStatusChange({
         top: e.clientY,
         left: e.clientX,
@@ -212,10 +221,10 @@ const Supplier: React.FC = () => {
   };
 
   const supplierPage = (page: string) => {
-      navigate(`/supplier-info/${page}`);
+    navigate(`/supplier-info/${page}`);
   };
-  const goOrder = (id: string) => {
-      navigate(`/purchase-order/${id}`);
+  const goOrder = (id: number) => {
+    navigate(`/purchase-order/${id}`);
   };
 
 
@@ -299,7 +308,7 @@ const Supplier: React.FC = () => {
           </div>
         </div>
         <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
-          <TableContainer sx={{ minHeight: 440, transform: 'translateY(-30px)' }}
+          <TableContainer sx={{ transform: 'translateY(-30px)' }}
           >
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
@@ -341,17 +350,18 @@ const Supplier: React.FC = () => {
                       tabIndex={-1}
                       key={index}
                     >
-                      <TableCell align="right"><Button onClick={() => goOrder(row.id)} variant='text'> {row.id} </Button></TableCell>
-                      <TableCell onClick={() => supplierPage(row.supplier)}><Button variant='text'>{row.supplier}</Button></TableCell>
-                      <TableCell> {row.purchase_date} </TableCell>
-                      <TableCell> <Button
+                      <TableCell className='table-cell' align="right"><Button onClick={() => goOrder(row.id)} variant='text'> {row.id} </Button></TableCell>
+                      <TableCell  className='table-cell' onClick={() => supplierPage(row.supplier)}><Button variant='text'>{row.supplier}</Button></TableCell>
+                      <TableCell className='table-cell'> {row.purchase_date} </TableCell>
+                      <TableCell className='table-cell'> <Button
                         onClick={(e) => handlePurchaseStatus(e, row.id, row.purchase_status)}
                         variant='text'>{row.purchase_status}</Button> </TableCell>
-                      <TableCell align="right"> $ {row.total} </TableCell>
-                      <TableCell align="right"> $ {row.whole_discount} </TableCell>
-                      <TableCell align="right"> $ {row.paid} </TableCell>
-                      <TableCell>
-                        <OrderMenuButton id={row.id} total={row.total} paid={row.paid} />
+                      <TableCell className='table-cell' align="right">{row.is_debt? 'true': 'false'} </TableCell>
+                      <TableCell className='table-cell' align="right">$ {row.total} </TableCell>
+                      <TableCell className='table-cell' align="right">$ {row.whole_discount} </TableCell>
+                      <TableCell className='table-cell' align="right">$ {row.paid? row.paid: 0} </TableCell>
+                      <TableCell className='table-cell'>
+                        <OrderMenuButton id={row.id} total={row.total} paid={row.paid} supplier = {row.supplier} is_debt={row.is_debt} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -377,9 +387,11 @@ interface OrderMenuProps {
   id: number;
   paid: string;
   total: string;
+  supplier: string;
+  is_debt: boolean;
 }
 
-const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total }) => {
+const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total, supplier, is_debt }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -389,8 +401,11 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total }) => {
   const viewOrder = () => {
     navigate(`/purchase-order/${id}`);
   }
+
   const paidOrder = () => {
-    axios.post("http://localhost:2312/purchase/payment", { id, paid: total })
+    let recorded_date = moment().format('MMMM Do YYYY, h:mm:ss a');
+    let payments = {recorded_date, paid_amount: total};
+    axios.post("http://localhost:2312/purchase/payment", { id, paid: total, is_debt, payments})
       .then(resp => {
         if (resp.data === 'success') toast.success("success")
         else if (resp.data === 'error') toast.error("error happened");
@@ -399,6 +414,24 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total }) => {
         toast.error(error.message);
       })
   }
+
+  const debt = () => {
+    /* order_id, supplier, total recorded_date */
+    let recorded_date = moment().format('MMMM Do YYYY, h:mm:ss a');
+    let data = { order_id: id, supplier, initial_amount: total, amount: 0, recorded_date, is_paid: false };
+    axios.post("http://localhost:2312/purchase/debt",  data)
+      .then(resp => {
+          if (resp.data === 'success') {
+              toast.success('success');
+          } else if (resp.data === 'error') {
+              toast.error('server error');
+          }
+      })
+      .catch(error => {
+          toast.error(error.message);
+      })
+  }
+
   const deleteOrder = () => {
     axios.post('http://localhost:2312/purchase/delete', { id: id })
       .then(resp => {
@@ -421,6 +454,9 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total }) => {
       case "paid":
         paidOrder();
         break;
+      case "debt":
+        debt();
+        break;
       case "delete":
         deleteOrder();
         break;
@@ -430,7 +466,7 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total }) => {
     setAnchorEl(null);
   }
 
-  const isDisable = () => parseFloat(paid) >= parseFloat(total);
+  const isDisablePaid = () => parseFloat(paid) >= parseFloat(total);
 
   return (
     <>
@@ -450,9 +486,13 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total }) => {
           <ViewWeekIcon />
           View
         </MenuItem>
-        <MenuItem disabled={isDisable()} onClick={() => handleClose("paid")} disableRipple>
-          <AttachMoneyIcon />
+        <MenuItem disabled={isDisablePaid()} onClick={() => handleClose("paid")} disableRipple>
+          <PaidIcon />
           Paid
+        </MenuItem>
+        <MenuItem disabled={is_debt}  style={{ color: '#ffcc00' }} onClick={() => handleClose("debt")} disableRipple>
+          <AttachMoneyIcon style={{ color: '#ffcc00' }} />
+          Debt
         </MenuItem>
         <MenuItem style={{ color: "red" }} onClick={() => handleClose("delete")} disableRipple>
           <DeleteIcon style={{ color: "red" }} />

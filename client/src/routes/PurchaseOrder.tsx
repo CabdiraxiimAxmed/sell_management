@@ -96,7 +96,7 @@ const PurchaseOrder: React.FC = () => {
         itemQuantity: itemQuantity,
         sale_price: item.sale_price,
         min_sale_price: item.min_sale_price,
-        selling_price: itemQuantity * parseFloat(item.sale_price) - discount,
+        selling_price: Math.floor((itemQuantity * parseFloat(item.sale_price) - discount) * 100) / 100,
         discount,
       };
       items.push(result);
@@ -207,7 +207,7 @@ const PurchaseOrder: React.FC = () => {
       if (!itemQuantity) {
         itemQuantity = 1;
       }
-      total += parseFloat(item.sale_price) * itemQuantity - discount;
+      total += Math.floor((parseFloat(item.sale_price) * itemQuantity - discount) * 100) / 100;
     }
     return total - wholeDiscount;
   };
@@ -431,7 +431,7 @@ const getItemSalePrice = (
   let priceInt = parseFloat(price);
   if (!quantity) quantity = 1;
   if (!discount) discount = 0;
-  return priceInt * quantity - discount;
+  return Math.floor((priceInt * quantity - discount) * 100) / 100;
 };
 
 export default PurchaseOrder;
