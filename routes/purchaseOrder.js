@@ -137,7 +137,7 @@ router.post('/purchase-order', async (req, res) => {
     wholeDiscount,
     total,
   } = req.body;
-  // const order_id = orderid.generate();
+  
   let formatItemArray = JSON.stringify(items);
   try {
     if (purchase_status === 'received') {
@@ -301,7 +301,7 @@ router.post('/get-debt-supplier', async (req, res) => {
   const { supplier } = req.body;
   try {
     const resp = await client.query(
-      `SELECT * FROM purch_debt WHERE supplier='${supplier}'`
+      `SELECT * FROM purchase_debt WHERE supplier='${supplier}'`
     );
     if (resp.rows.length === 0) {
       let result = [

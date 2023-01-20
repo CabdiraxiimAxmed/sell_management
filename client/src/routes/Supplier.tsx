@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import Header, { DrawerHeader } from './Header';
+import React, { useEffect, useState, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
-import { Box, Stack, Typography, Button } from '@mui/material';
+import { Stack, Typography, Button } from '@mui/material';
 
 type SupplierType = {
   id: number;
@@ -26,6 +26,7 @@ type ColumnDisplayType = {
   city: boolean;
 };
 const Supplier: React.FC = () => {
+  const componentRef = useRef(null);
   const navigate = useNavigate();
   const [suppliers, setSuppliers] = useState<SupplierType[]>([
     {
@@ -107,6 +108,11 @@ const Supplier: React.FC = () => {
   const display = (column_head: string) => {
     return columnDisplay[column_head as keyof ColumnDisplayType];
   };
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
   return (
     <>
       <Stack
@@ -159,12 +165,12 @@ const Supplier: React.FC = () => {
                 )}
               </div>
             </div>
-            <button className="dropBtn">
+            <button onClick={handlePrint} className="dropBtn">
               <DownloadIcon /> export
             </button>
           </div>
         </div>
-        <div className="table-container">
+        <div ref={componentRef} className="table-container">
           <table>
             <thead>
               <tr>

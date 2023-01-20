@@ -237,7 +237,7 @@ const Products: React.FC = () => {
         />
         <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
           <TableContainer
-            sx={{ minHeight: 440, transform: 'translateY(-30px)' }}
+            sx={{ transform: 'translateY(-30px)' }}
           >
             <Table stickyHeader aria-label="sticky table">
               <TableHead>

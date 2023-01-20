@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useReactToPrint } from 'react-to-print';
 import { ToastContainer, toast } from 'react-toastify';
 import {
   Button,
@@ -22,6 +23,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
+import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -85,6 +87,8 @@ interface Columns {
 }
 
 const SupplierInfo: React.FC = () => {
+  const itemBoughtRef = useRef(null);
+  const debtRef = useRef(null);
   const [editCustomer, setEditCustomer] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [debtId, setDebtId] = useState<number>(0);
@@ -272,6 +276,14 @@ const SupplierInfo: React.FC = () => {
   };
 
   const debt: any = findDebtById(debtId);
+  
+  const handleItemsPrint = useReactToPrint({
+    content: () => itemBoughtRef.current,
+  });
+
+  const handleDebtPrint = useReactToPrint({
+    content: () => debtRef.current,
+  });
 
   return (
     <Grid container>
@@ -319,11 +331,16 @@ const SupplierInfo: React.FC = () => {
           <Typography variant="h5" style={{ fontWeight: 'bold' }}><AttachMoneyIcon />{sumTotalDebt()}</Typography>
         </div>
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <Typography variant="h4">Items bought</Typography>
       </Grid>
+      <Grid container justifyContent='right' item xs={6}>
+        <button className="dropBtn" onClick={handleItemsPrint}>
+          <DownloadIcon /> export
+        </button>
+      </Grid>
       <Grid item xs={12}>
-        <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={5}>
+        <Paper ref={itemBoughtRef} style={{ marginTop: '10px', marginBottom: '20px', overflow: 'hidden' }} elevation={5}>
           <TableContainer sx={{ transform: 'translateY(-30px)' }}
           >
             <Table stickyHeader aria-label="sticky table">
@@ -390,8 +407,13 @@ const SupplierInfo: React.FC = () => {
           </TableContainer>
         </Paper>
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <Typography variant="h4">Debts</Typography>
+      </Grid>
+      <Grid container justifyContent='right' item xs={6}>
+        <button className="dropBtn" onClick={handleDebtPrint}>
+          <DownloadIcon /> export
+        </button>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -404,7 +426,7 @@ const SupplierInfo: React.FC = () => {
         <span className="debt-section"><IconButton color="primary" size="large" onClick={findDebtByDate}><SearchIcon /></IconButton></span>
       </Grid>
       <Grid item xs={12}>
-        <div className="table-container">
+        <div ref={debtRef} className="table-container">
           <table>
             <thead>
               <tr>

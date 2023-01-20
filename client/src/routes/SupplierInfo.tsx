@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import {
@@ -22,6 +23,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
+import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -35,16 +37,8 @@ type OrderType = {
   paid: string;
 };
 
-type ColumnDisplayType = {
-  id: boolean;
-  supplier: boolean;
-  purchase_status: boolean;
-  total: boolean;
-  paid: boolean;
-};
-
 type Payments = {
-  recordedDate: string;
+  recorded_date: string;
   paidAmount: string;
 };
 
@@ -52,15 +46,12 @@ type DebtType = {
   id: number;
   amount: string;
   order_id: string;
-  payments: Payments[];
+  payments: Payments;
   is_paid: boolean;
-  recordeddate: string;
+  recorded_date: string;
   supplier: string;
   initialamount: string;
 };
-/*
- * id  supplier purchase_status total  paid
- * */
 interface Columns {
   id:
   | 'id'
@@ -77,6 +68,8 @@ interface Columns {
 
 const SupplierInfo: React.FC = () => {
   const navigate = useNavigate();
+  const itemBoughtRef = useRef(null);
+  const debtRef = useRef(null);
   const [open, setOpen] = useState<boolean>(false);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
@@ -118,9 +111,9 @@ const SupplierInfo: React.FC = () => {
       id: 0,
       amount: '',
       order_id: '',
-      payments: [{ recordedDate: '', paidAmount: '' }],
+      payments: { recorded_date: '', paidAmount: '' },
       is_paid: false,
-      recordeddate: '',
+      recorded_date: '',
       supplier: '',
       initialamount: '',
     },
@@ -139,8 +132,8 @@ const SupplierInfo: React.FC = () => {
 
         setOrders(res.data);
       })
-      .catch(err => {
-        toast.error('qalad ayaa dhacay');
+      .catch(error => {
+        toast.error(error.message);
       });
 
     axios
@@ -157,6 +150,8 @@ const SupplierInfo: React.FC = () => {
         toast.error(error.message);
       });
   }, []);
+
+  console.log(debts);
 
   const findDebtByDate = () => {
     if (!date) {
@@ -219,9 +214,9 @@ const SupplierInfo: React.FC = () => {
         id: 0,
         amount: '',
         order_id: '',
-        payments: [{ recordedDate: '', paidAmount: '' }],
+        payments: { recorded_date: '', paidAmount: '' },
         is_paid: false,
-        recordeddate: '',
+        recorded_date: '',
         supplier: '',
         initialamount: '',
       };
@@ -251,6 +246,14 @@ const SupplierInfo: React.FC = () => {
 
   const debt: any = findDebtById(debtId);
 
+  const handleItemsPrint = useReactToPrint({
+    content: () => itemBoughtRef.current,
+  });
+
+  const handleDebtPrint = useReactToPrint({
+    content: () => debtRef.current,
+  });
+
   return (
     <Grid container>
       <ToastContainer
@@ -274,33 +277,28 @@ const SupplierInfo: React.FC = () => {
           id="customized-dialog-title"
           onClose={handleClose}
         >
-          xogta
+          details
         </BootstrapDialogTitle>
         <DialogContent dividers>
           <Typography style={{ fontWeight: 'bold' }}>
-            supplier: <span className="debt-section">${debt.supplier}</span>
+            supplier: <span className="debt-section">{debt.supplier}</span>
           </Typography>
           <Typography style={{ fontWeight: 'bold' }}>
-            Asal: <span className="debt-section">${debt.initialamount}</span>
-          </Typography>
-          <Typography style={{ fontWeight: 'bold' }}>
-            Hadda: <span className="debt-section">${debt.amount}</span>
+            initial amount: <span className="debt-section">${debt.initial_amount}</span>
           </Typography>
           <Divider />
-          <Typography>Diwaanka bixinta</Typography>
-          {debt.payments.map((payment: Payments, index: number) => (
-            <div key={index}>
+          <Typography>recorded payment</Typography>
+            <div>
               <Typography style={{ fontWeight: 'bold' }}>
-                cadadka:{' '}
-                <span className="debt-section">${payment.paidAmount}</span>
+                paid_amount:
+                <span className="debt-section">${debt.payments?.paid_amount}</span>
               </Typography>
               <Typography style={{ fontWeight: 'bold' }}>
-                xilliga:{' '}
-                <span className="debt-section">{payment.recordedDate}</span>
+                paid_date:
+                <span className="debt-section">{debt.payments?.recorded_date}</span>
               </Typography>
               <Divider />
             </div>
-          ))}
         </DialogContent>
       </BootstrapDialog>
       <Grid item xs={6}>
@@ -322,11 +320,16 @@ const SupplierInfo: React.FC = () => {
           </Typography>
         </div>
       </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h4">Alaab ka gadatay</Typography>
+      <Grid item xs={6}>
+        <Typography variant="h4">Items you bought</Typography>
+      </Grid>
+      <Grid container justifyContent='right' item xs={6}>
+        <button className="dropBtn" onClick={handleItemsPrint}>
+          <DownloadIcon /> export
+        </button>
       </Grid>
       <Grid item xs={12}>
-        <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={5}>
+        <Paper ref={itemBoughtRef} style={{ marginTop: '10px', marginBottom: '20px', overflow: 'hidden' }} elevation={5}>
           <TableContainer sx={{ transform: 'translateY(-30px)' }}
           >
             <Table stickyHeader aria-label="sticky table">
@@ -393,8 +396,13 @@ const SupplierInfo: React.FC = () => {
           </TableContainer>
         </Paper>
       </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h4">Deynta laguugu leeyahay</Typography>
+      <Grid item xs={6}>
+        <Typography variant="h4">Debts</Typography>
+      </Grid>
+      <Grid container justifyContent='right' item xs={6}>
+        <button className="dropBtn" onClick={handleDebtPrint}>
+          <DownloadIcon /> export
+        </button>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -410,17 +418,17 @@ const SupplierInfo: React.FC = () => {
           </IconButton>
         </span>
       </Grid>
-      <Grid item xs={6}>
-        <div className="table-container">
+      <Grid item xs={12}>
+        <div ref={debtRef} className="table-container">
           <table>
             <thead>
               <tr>
                 <th>id</th>
                 <th>order_id</th>
                 <th>supplier</th>
-                <th>waqtiga</th>
-                <th>asal</th>
-                <th>hartay</th>
+                <th>date</th>
+                <th>initial amount</th>
+                <th>paid</th>
               </tr>
             </thead>
             {debts.map((debt, index) => (
@@ -437,7 +445,7 @@ const SupplierInfo: React.FC = () => {
                     </Button>
                   </td>
                   <td style={{ fontWeight: '400' }}>{debt.supplier}</td>
-                  <td style={{ fontWeight: '400' }}>{debt.recordeddate}</td>
+                  <td style={{ fontWeight: '400' }}>{debt.recorded_date}</td>
                   <td style={{ fontWeight: '400' }}>${debt.initialamount}</td>
                   <td style={{ fontWeight: '400' }}>${debt.amount}</td>
                   <td>

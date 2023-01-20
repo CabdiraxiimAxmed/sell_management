@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import Header, { DrawerHeader } from './Header';
+import React, { useEffect, useState, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import EditIcon from '@mui/icons-material/Edit';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
-import { Box, Stack, Typography, Button } from '@mui/material';
+import {Stack, Typography, Button } from '@mui/material';
 
 import AddCustomer from '../components/AddCustomer';
-import EditCustomer from '../components/EditCustomer';
 
 type CustomerType = {
   id: number,
@@ -32,8 +30,8 @@ type ColumnDisplayType = {
 };
 const Customers: React.FC = () => {
   const navigate = useNavigate();
+  const componentRef = useRef(null);
   const [addCustomer, setAddCustomer] = useState<boolean>(false);
-  const [editCustomer, setEditCustomer] = useState<boolean>(false);
   const [customers, setCustomers] = useState<CustomerType[]>([
     {
       id: 0,
@@ -112,6 +110,11 @@ const Customers: React.FC = () => {
   const display = (column_head: string) => {
     return columnDisplay[column_head as keyof ColumnDisplayType];
   }
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
   return (
     <>
       <ToastContainer
@@ -157,10 +160,10 @@ const Customers: React.FC = () => {
               ))}
             </div>
           </div>
-    <button className="dropBtn"><DownloadIcon/> export</button>
+    <button onClick={handlePrint} className="dropBtn"><DownloadIcon/> export</button>
         </div>
       </div>
-      <div className="table-container">
+      <div ref={componentRef} className="table-container">
         <table>
           <thead>
             <tr>

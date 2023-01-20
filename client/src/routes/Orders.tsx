@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { styled, alpha } from '@mui/material/styles';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -60,6 +61,7 @@ const Supplier: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const componentRef = useRef(null);
   const [orders, setOrders] = useState<OrderType[]>([
     {
       id: 0,
@@ -227,6 +229,9 @@ const Supplier: React.FC = () => {
     navigate(`/purchase-order/${id}`);
   };
 
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
 
   return (
     <>
@@ -265,7 +270,7 @@ const Supplier: React.FC = () => {
           startIcon={<AddIcon />}
           style={{ backgroundColor: '#2367d1', fontWeight: 'bold' }}
         >
-          Dalab
+          Order
         </Button>
       </Stack>
       <div className="container">
@@ -284,11 +289,11 @@ const Supplier: React.FC = () => {
                 <label className="switch">
                   <input
                     type="checkbox"
-                    name="pending"
+                    name="ordered"
                     className="checkbox"
                     onChange={handleFilterStatus}
                   />
-                  <span>pending</span>
+                  <span>ordered</span>
                 </label>
                 <label className="switch">
                   <input
@@ -302,12 +307,12 @@ const Supplier: React.FC = () => {
               </div>
             </div>
 
-            <button className="dropBtn">
+            <button onClick={handlePrint} className="dropBtn">
               <DownloadIcon /> export
             </button>
           </div>
         </div>
-        <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
+        <Paper ref={componentRef} style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
           <TableContainer sx={{ transform: 'translateY(-30px)' }}
           >
             <Table stickyHeader aria-label="sticky table">
@@ -351,7 +356,7 @@ const Supplier: React.FC = () => {
                       key={index}
                     >
                       <TableCell className='table-cell' align="right"><Button onClick={() => goOrder(row.id)} variant='text'> {row.id} </Button></TableCell>
-                      <TableCell  className='table-cell' onClick={() => supplierPage(row.supplier)}><Button variant='text'>{row.supplier}</Button></TableCell>
+                      <TableCell className='table-cell' onClick={() => supplierPage(row.supplier)}><Button variant='text'>{row.supplier}</Button></TableCell>
                       <TableCell className='table-cell'> {row.purchase_date} </TableCell>
                       <TableCell className='table-cell'> <Button
                         onClick={(e) => handlePurchaseStatus(e, row.id, row.purchase_status)}
@@ -360,7 +365,7 @@ const Supplier: React.FC = () => {
                       <TableCell className='table-cell' align="right">$ {row.total} </TableCell>
                       <TableCell className='table-cell' align="right">$ {row.whole_discount} </TableCell>
                       <TableCell className='table-cell' align="right">$ {row.paid? row.paid: 0} </TableCell>
-                      <TableCell className='table-cell'>
+                      <TableCell align='center' className='table-cell'>
                         <OrderMenuButton id={row.id} total={row.total} paid={row.paid} supplier = {row.supplier} is_debt={row.is_debt} />
                       </TableCell>
                     </TableRow>
@@ -490,7 +495,7 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total, supplier, 
           <PaidIcon />
           Paid
         </MenuItem>
-        <MenuItem disabled={is_debt}  style={{ color: '#ffcc00' }} onClick={() => handleClose("debt")} disableRipple>
+        <MenuItem disabled={is_debt || isDisablePaid()}  style={{ color: '#ffcc00' }} onClick={() => handleClose("debt")} disableRipple>
           <AttachMoneyIcon style={{ color: '#ffcc00' }} />
           Debt
         </MenuItem>

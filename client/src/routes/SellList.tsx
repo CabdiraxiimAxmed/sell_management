@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import { styled, alpha } from '@mui/material/styles'
@@ -67,6 +68,7 @@ interface Columns {
 
 const SellsList: React.FC = () => {
   const navigate = useNavigate();
+  const componentRef = useRef(null);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sells, setSells] = useState<SellType[]>([
@@ -228,6 +230,10 @@ const SellsList: React.FC = () => {
     setPage(0);
   };
 
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
   return (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5} style={{ marginBottom: 9 }}>
@@ -273,10 +279,10 @@ const SellsList: React.FC = () => {
                 ))}
               </div>
             </div>
-            <button className="dropBtn"><DownloadIcon /> export</button>
+            <button onClick={handlePrint} className="dropBtn"><DownloadIcon /> export</button>
           </div>
         </div>
-        <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
+        <Paper ref={componentRef} style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
           <TableContainer sx={{ minHeight: 440, transform: 'translateY(-30px)' }}
           >
             <Table stickyHeader aria-label="sticky table">
