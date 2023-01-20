@@ -276,7 +276,6 @@ const SellsList: React.FC = () => {
             <button className="dropBtn"><DownloadIcon /> export</button>
           </div>
         </div>
-        {/* table goes here */}
         <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={10}>
           <TableContainer sx={{ minHeight: 440, transform: 'translateY(-30px)' }}
           >

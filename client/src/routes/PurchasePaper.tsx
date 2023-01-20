@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Box, Grid, Typography, Container } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
-import {useReactToPrint}  from 'react-to-print';
+import { useReactToPrint } from 'react-to-print';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useParams } from 'react-router-dom';
 import axios from 'axios'
@@ -11,7 +11,7 @@ type OrderType = {
   supplier: string,
   purchase_date: string,
   purchase_status: string,
-  items: {item: string, quantity:number, price:number, amount: number}[][],
+  items: { item: string, quantity: number, price: number, amount: number }[][],
   whole_discount: string,
   total: string,
 };
@@ -35,7 +35,7 @@ const PurchasePaper: React.FC = () => {
       supplier: '',
       purchase_date: '',
       purchase_status: '',
-      items: [[{item: '', quantity: 0, price: 0, amount: 0}]],
+      items: [[{ item: '', quantity: 0, price: 0, amount: 0 }]],
       whole_discount: '',
       total: '',
     }
@@ -52,29 +52,29 @@ const PurchasePaper: React.FC = () => {
 
   useEffect(() => {
     axios.get(`http://localhost:2312/purchase/orders/${order_id}`)
-         .then(res => {
-           if(res.data == 'error') {
-             toast.error("SERVER: qalad ayaa dhacay");
-             return;
-           }
-           setOrder(res.data);
-         }) .catch(error => {
-           toast.error(eror.message);
-         })
+      .then(res => {
+        if (res.data == 'error') {
+          toast.error("SERVER: qalad ayaa dhacay");
+          return;
+        }
+        setOrder(res.data);
+      }).catch(error => {
+        toast.error(error.message);
+      })
   }, []);
 
   useEffect(() => {
     if (order[0].supplier) {
-      axios.post('http://localhost:2312/supplier/supplier', {name: order[0].supplier})
-           .then(res => {
-             if(res.data == 'error') {
-               toast.error("SERVER: qalad ayaa dhacay");
-               return;
-             }
-             setSupplier(res.data[0]);
-           }) .catch(error => {
-             toast.error(error.message);
-           })
+      axios.post('http://localhost:2312/supplier/supplier', { name: order[0].supplier })
+        .then(res => {
+          if (res.data == 'error') {
+            toast.error("SERVER: qalad ayaa dhacay");
+            return;
+          }
+          setSupplier(res.data[0]);
+        }).catch(error => {
+          toast.error(error.message);
+        })
     }
   }, [order])
 
@@ -83,7 +83,7 @@ const PurchasePaper: React.FC = () => {
   });
 
   return (
-    <Box ref={componentRef} sx={{width: 500, backgroundColor:'white', padding:'0 22px', borderRadius: '4px', boxShadow: '1px 1px 20px rgba(0, 0, 0, 0.2)'}}>
+    <Box ref={componentRef} sx={{ width: 500, backgroundColor: 'white', padding: '0 22px', borderRadius: '4px', boxShadow: '1px 1px 20px rgba(0, 0, 0, 0.2)' }}>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -98,7 +98,7 @@ const PurchasePaper: React.FC = () => {
       />
       <Grid container>
         <Grid item xs={6}>
-          <button className="dropBtn" onClick={handlePrint}><DownloadIcon/> export</button>
+          <button className="dropBtn" onClick={handlePrint}><DownloadIcon /> export</button>
         </Grid>
         <Grid item xs={6}>
           <Typography variant="h5">Warqada Dalabka</Typography>
@@ -108,21 +108,21 @@ const PurchasePaper: React.FC = () => {
         </Grid>
         <Grid item xs={6}>
           <Typography variant="h6">Address</Typography>
-          <Typography variant="body2" style={{color: '#7d7d7d'}}>{supplier.name}</Typography>
-          <Typography variant="body2" style={{color: '#7d7d7d'}}>{supplier.address} {supplier.city}</Typography>
-          <Typography variant="body2" style={{color: '#7d7d7d'}}>{supplier.email}</Typography>
-          <Typography variant="body2" style={{color: '#7d7d7d'}}>{supplier.contact}</Typography>
+          <Typography variant="body2" style={{ color: '#7d7d7d' }}>{supplier.name}</Typography>
+          <Typography variant="body2" style={{ color: '#7d7d7d' }}>{supplier.address} {supplier.city}</Typography>
+          <Typography variant="body2" style={{ color: '#7d7d7d' }}>{supplier.email}</Typography>
+          <Typography variant="body2" style={{ color: '#7d7d7d' }}>{supplier.contact}</Typography>
         </Grid>
-        <Grid item xs={12} container style={{paddingTop: '15px', paddingBottom: '15px'}}>
+        <Grid item xs={12} container style={{ paddingTop: '15px', paddingBottom: '15px' }}>
           <Grid item xs={6}>
             <Typography variant="h6">Loo wadaa</Typography>
-            <Typography variant="body2" style={{color: '#7d7d7d'}}>Nasiib</Typography>
-            <Typography variant="body2" style={{color: '#7d7d7d'}}>Bakara Mogadishu/Somali</Typography>
-            <Typography variant="body2" style={{color: '#7d7d7d'}}>nasiib@gmail.com</Typography>
-            <Typography variant="body2" style={{color: '#7d7d7d'}}>2345345</Typography>
+            <Typography variant="body2" style={{ color: '#7d7d7d' }}>Nasiib</Typography>
+            <Typography variant="body2" style={{ color: '#7d7d7d' }}>Bakara Mogadishu/Somali</Typography>
+            <Typography variant="body2" style={{ color: '#7d7d7d' }}>nasiib@gmail.com</Typography>
+            <Typography variant="body2" style={{ color: '#7d7d7d' }}>2345345</Typography>
           </Grid>
           <Grid item xs={6}>
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-around'}}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
               <Typography variant="h6">waqtiga dalabka:</Typography>
               <Typography variant="body2">{order[0].purchase_date}</Typography>
             </Box>
@@ -132,38 +132,37 @@ const PurchasePaper: React.FC = () => {
           <Typography>Alaabta</Typography>
         </Grid>
         <Grid item xs={12}>
-      <div className="table-container purchase-paper">
-        <table>
-          <thead>
-            <tr>
-              <th>item name</th>
-              <th>quantity</th>
-              <th>price</th>
-              <th>discount</th>
-              <th>amount</th>
-            </tr>
-          </thead>
-          {order[0].items[0].map((item, index) => (
-            <tbody key={index}>
-              <tr>
-                <td>{item.name}</td>
-                <td>{item.itemQuantity}</td>
-                <td>{item.sale_price}</td>
-                <td>{item.discount}</td>
-                <td>{item.selling_price}</td>
-              </tr>
-            </tbody>
-          ))}
-        </table>
-      </div>
+          <div className="table-container purchase-paper">
+            <table>
+              <thead>
+                <tr>
+                  <th>item name</th>
+                  <th>quantity</th>
+                  <th>price</th>
+                  <th>discount</th>
+                  <th>amount</th>
+                </tr>
+              </thead>
+              {order[0].items[0].map((item, index) => (
+                <tbody key={index}>
+                  <tr>
+                    <td>{item.item}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.price}</td>
+                    <td>{item.amount}</td>
+                  </tr>
+                </tbody>
+              ))}
+            </table>
+          </div>
         </Grid>
         <Grid item xs={12} container justifyContent="flex-end">
-          <Container style={{display: 'flex', justifyContent: 'end'}}>
-            <Typography variant="body2" style={{marginRight: '15px'}}>DISCOUNT</Typography>
+          <Container style={{ display: 'flex', justifyContent: 'end' }}>
+            <Typography variant="body2" style={{ marginRight: '15px' }}>DISCOUNT</Typography>
             <Typography variant="caption">$ {order[0].whole_discount}</Typography>
           </Container>
-          <Container style={{display: 'flex', justifyContent: 'end'}}>
-            <Typography variant="body2" style={{marginRight: '15px'}}>WADARTA</Typography>
+          <Container style={{ display: 'flex', justifyContent: 'end' }}>
+            <Typography variant="body2" style={{ marginRight: '15px' }}>WADARTA</Typography>
             <Typography variant="caption">${order[0].total}</Typography>
           </Container>
         </Grid>

@@ -1,7 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
-import { Button, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Divider, TextField, IconButton, Paper } from '@mui/material';
+import {
+  Button,
+  Grid,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Divider,
+  TableBody,
+  TextField,
+  IconButton,
+  Paper,
+  TablePagination,
+  Table,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -46,17 +64,32 @@ type DebtType = {
   id: number,
   amount: string,
   sell_id: string,
-  payments: Payments[][],
+  payments: Payments,
   is_paid: boolean,
   recordeddate: string,
   customer: string,
   initialamount: string,
 };
 
+interface Columns {
+  id:
+  | 'order_id'
+  | 'customer'
+  | 'is_debt'
+  | 'total'
+  | 'paid'
+  label: string;
+  minWidth?: number;
+  align?: 'right';
+  format?: (value: number) => string;
+}
+
 const SupplierInfo: React.FC = () => {
   const [editCustomer, setEditCustomer] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [debtId, setDebtId] = useState<number>(0);
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [date, setDate] = useState<string>('');
   const { name } = useParams();
 
@@ -88,7 +121,7 @@ const SupplierInfo: React.FC = () => {
       id: 0,
       amount: '',
       sell_id: '',
-      payments: [[{recordedDate: '', paidAmount: ''}]],
+      payments: { recordedDate: '', paidAmount: '' },
       is_paid: false,
       recordeddate: '',
       customer: '',
@@ -97,74 +130,94 @@ const SupplierInfo: React.FC = () => {
 
   ])
 
+  const columns: readonly Columns[] = [
+    { id: 'order_id', label: 'id', minWidth: 100 },
+    { id: 'customer', label: 'Customer', minWidth: 170 },
+    { id: 'is_debt', label: 'is_debt', minWidth: 170, align: 'right' },
+    {
+      id: 'total',
+      label: 'total',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => `$${value.toLocaleString('en-US')}`,
+    },
+    {
+      id: 'paid',
+      label: 'paid',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => `$${value.toLocaleString('en-US')}`,
+    }
+  ];
+
   useEffect(() => {
-    axios.post('/customers/name', { name })
-         .then(res => {
-           if(res.data === 'error') {
-             toast.error('SERVER: qalad ayaa dhacay');
-             return
-           }
+    axios.post('http://localhost:2312/customers/name', { name })
+      .then(res => {
+        if (res.data === 'error') {
+          toast.error('SERVER: qalad ayaa dhacay');
+          return
+        }
 
-           setCustomer(res.data);
-         }).catch(err => {
-           toast.error('qalad ayaa dhacay');
-         });
+        setCustomer(res.data);
+      }).catch(error => {
+        toast.error(error.message);
+      });
 
-    axios.post('/customers/sells', { name })
-         .then(res => {
-           if(res.data === 'error') {
-             toast.error('SERVER: qalad ayaa dhacay');
-             return
-           }
+    axios.post('http://localhost:2312/customers/sells', { name })
+      .then(res => {
+        if (res.data === 'error') {
+          toast.error('SERVER: qalad ayaa dhacay');
+          return
+        }
 
-           setSells(res.data);
-         }).catch(err => {
-           toast.error('qalad ayaa dhacay');
-         });
+        setSells(res.data);
+      }).catch(error => {
+        toast.error(error.message);
+      });
 
-    axios.post('/customers/debt', { name })
-         .then(res => {
-           if(res.data === 'error') {
-             toast.error('SERVER: qalad ayaa dhacay');
-             return
-           }
+    axios.post('http://localhost:2312/customers/debt', { name })
+      .then(res => {
+        if (res.data === 'error') {
+          toast.error('SERVER: qalad ayaa dhacay');
+          return
+        }
 
-           setDebts(res.data);
-         }).catch(err => {
-           toast.error('qalad ayaa dhacay');
-         });
+        setDebts(res.data);
+      }).catch(error => {
+        toast.error(error.message);
+      });
   }, []);
 
   const findDebtByDate = () => {
     if (!date) {
-      axios.post('/customers/debt', { name })
-           .then(res => {
-             if(res.data === 'error') {
-               toast.error('SERVER: qalad ayaa dhacay');
-               return
-             }
-             setDebts(res.data);
-           }).catch(err => {
-             toast.error('qalad ayaa dhacay');
-           });
+      axios.post('http://localhost:2312/customers/debt', { name })
+        .then(res => {
+          if (res.data === 'error') {
+            toast.error('SERVER: qalad ayaa dhacay');
+            return
+          }
+          setDebts(res.data);
+        }).catch(error => {
+          toast.error(error.message);
+        });
       return;
     }
 
-    axios.post('/customers/debt-date', { customer: name, date })
-         .then(res => {
-           if(res.data === 'error') {
-             toast.error('SERVER: qalad ayaa dhacay');
-             return
-           }
+    axios.post('http://localhost:2312/customers/debt-date', { customer: name, date })
+      .then(res => {
+        if (res.data === 'error') {
+          toast.error('SERVER: qalad ayaa dhacay');
+          return
+        }
 
-           setDebts(res.data);
-         }).catch(err => {
-           toast.error('qalad ayaa dhacay');
-         });
+        setDebts(res.data);
+      }).catch(error => {
+        toast.error(error.message);
+      });
   }
 
   const goOrderPaper = (id: string) => {
-    navigate(`/purchase-order/${id}`)
+    navigate(`/sells/${id}`)
   };
 
   const findColor = (status: string) => {
@@ -183,12 +236,12 @@ const SupplierInfo: React.FC = () => {
 
   const findDebtById = (id: number) => {
     let debt: any = debts.find(debt => debt.id == id);
-    if(!debt) {
+    if (!debt) {
       return {
         id: 0,
         amount: '',
         order_id: '',
-        payments: [[{recordedDate: '', paidAmount: ''}]],
+        payments: [[{ recordedDate: '', paidAmount: '' }]],
         is_paid: false,
         recordeddate: '',
         supplier: '',
@@ -200,10 +253,22 @@ const SupplierInfo: React.FC = () => {
 
   const sumTotalDebt = () => {
     let total: number = 0;
-    for(let debt of debts) {
+    for (let debt of debts) {
       total += parseFloat(debt.amount);
     }
+    if (!total) return 0;
     return total;
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
   };
 
   const debt: any = findDebtById(debtId);
@@ -222,71 +287,111 @@ const SupplierInfo: React.FC = () => {
         pauseOnHover
         theme="dark"
       />
-      {editCustomer &&  <EditCustomer customer={customer} />}
+      {editCustomer && <EditCustomer customer={customer} />}
 
-    <BootstrapDialog
-            onClose={handleClose}
-            aria-labelledby="customized-dialog-title"
-            open={open}
-          >
+      <BootstrapDialog
+        onClose={handleClose}
+        aria-labelledby="customized-dialog-title"
+        open={open}
+      >
         <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
           xogta
         </BootstrapDialogTitle>
         <DialogContent dividers>
-          <Typography style={{fontWeight: 'bold'}}>customer: <span className="debt-section">{debt.customer}</span></Typography>
-          <Typography style={{fontWeight: 'bold'}}>Asal: <span className="debt-section">${debt.initialamount}</span></Typography>
-          <Typography style={{fontWeight: 'bold'}}>Hadda: <span className="debt-section">${debt.amount}</span></Typography>
-          <Divider/>
-          <Typography >Diwaanka bixinta</Typography>
-          {debt.payments.map((payment: Payments[], index: number) => (
-            <>
-              <Typography style={{fontWeight: 'bold'}}>cadadka: <span className="debt-section">${payment[0].paidAmount}</span></Typography>
-              <Typography style={{fontWeight: 'bold'}}>xilliga: <span className="debt-section">{payment[0].recordedDate}</span></Typography>
-              <Divider/>
-            </>
-          ))}
+          <Typography style={{ fontWeight: 'bold' }}>customer: <span className="debt-section">{debt.customer}</span></Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Initial: <span className="debt-section">$ {debt.initialamount}</span></Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Current: <span className="debt-section">$ {debt.amount}</span></Typography>
+          <Divider />
+          <Typography >Payments</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Amount: <span className="debt-section">$ {debt.payments?.paidAmount}</span></Typography>
+          <Typography style={{ fontWeight: 'bold' }}>date: <span className="debt-section">{debt.payments?.recordedDate}</span></Typography>
+          <Divider />
         </DialogContent>
       </BootstrapDialog>
       <Grid item xs={6}>
-        <Button variant="contained" onClick={() => setEditCustomer(!editCustomer) } startIcon={<AddIcon />} style={{backgroundColor:"#2367d1", fontWeight: 'bold'}}>
+        <Button variant="contained" onClick={() => setEditCustomer(!editCustomer)} startIcon={<AddIcon />} style={{ backgroundColor: "#2367d1", fontWeight: 'bold' }}>
           Update
         </Button>
       </Grid>
       <Grid item xs={6}>
         <div className="debt-amount-container">
           <Typography variant="body2">Cadadka deynta</Typography>
-          <Typography variant="h5" style={{fontWeight: 'bold'}}><AttachMoneyIcon />{sumTotalDebt()}</Typography>
+          <Typography variant="h5" style={{ fontWeight: 'bold' }}><AttachMoneyIcon />{sumTotalDebt()}</Typography>
         </div>
       </Grid>
       <Grid item xs={12}>
-        <Typography variant="h4">Alaab ka gadatay</Typography>
+        <Typography variant="h4">Items bought</Typography>
       </Grid>
       <Grid item xs={12}>
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                {Object.keys(sells[0]).map((column_head, index) => (
-                  <th key={index}>{column_head}</th>
-                ))}
-              </tr>
-            </thead>
-            {sells.map((sell, index) => (
-              <tbody key={index}>
-                <tr>
-                  <td> <Button variant="text" onClick={() => goOrderPaper(sell.order_id) }>{sell.order_id}</Button></td>
-                  <td>{sell.customer}</td>
-                  <td>{sell.is_debt? 'true' : 'false'}</td>
-                  <td>${sell.total}</td>
-                  <td>${sell.paid}</td>
-                </tr>
-              </tbody>
-            ))}
-          </table>
-        </div>
+        <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={5}>
+          <TableContainer sx={{ transform: 'translateY(-30px)' }}
+          >
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  {columns.map(column => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{
+                        minWidth: column.minWidth,
+                        backgroundColor: 'black',
+                        color: 'white',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
+                  <TableCell
+                    align="left"
+                    style={{
+                      minWidth: 170,
+                      backgroundColor: 'black',
+                      color: 'white',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sells
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row: SellType, index: number) => (
+                    <TableRow
+                      hover
+                      role="row"
+                      tabIndex={-1}
+                      key={index}
+                    >
+                      <TableCell className='table-cell'>
+                        <Button
+                          onClick={() => goOrderPaper(row.order_id)}
+                          variant='text'>{row.order_id}</Button>
+                      </TableCell>
+                      <TableCell className='table-cell'>{row.customer}</TableCell>
+                      <TableCell align='right' className='table-cell'>{row.is_debt ? "true" : 'false'}</TableCell>
+                      <TableCell className='table-cell' align="right"> $ {row.total} </TableCell>
+                      <TableCell className='table-cell' align="right"> $ {row.paid} </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              rowsPerPageOptions={[5, 25, 100]}
+              component="div"
+              count={sells.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableContainer>
+        </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Typography variant="h4">Deynta aad leeyahay</Typography>
+        <Typography variant="h4">Debts</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -294,9 +399,9 @@ const SupplierInfo: React.FC = () => {
           id="find-debt-by-date"
           label="bisha malinta"
           name="debt"
-          onChange={(e) => setDate(e.target.value) }
+          onChange={(e) => setDate(e.target.value)}
         />
-        <span className="debt-section"><IconButton color="primary" size="large" onClick={findDebtByDate}><SearchIcon/></IconButton></span>
+        <span className="debt-section"><IconButton color="primary" size="large" onClick={findDebtByDate}><SearchIcon /></IconButton></span>
       </Grid>
       <Grid item xs={12}>
         <div className="table-container">
@@ -315,11 +420,11 @@ const SupplierInfo: React.FC = () => {
               <tbody>
                 <tr>
                   <td>{debt.id}</td>
-                  <td> <Button variant="text" onClick={() => goOrderPaper(debt.sell_id) }>{debt.sell_id}</Button></td>
-                  <td style={{ fontWeight: '400'}}>{debt.customer}</td>
-                  <td style={{ fontWeight: '400'}}>{debt.recordeddate}</td>
-                  <td style={{ fontWeight: '400'}}>${debt.initialamount}</td>
-                  <td style={{ fontWeight: '400'}}>${debt.amount}</td>
+                  <td> <Button variant="text" onClick={() => goOrderPaper(debt.sell_id)}>{debt.sell_id}</Button></td>
+                  <td style={{ fontWeight: '400' }}>{debt.customer}</td>
+                  <td style={{ fontWeight: '400' }}>{debt.recordeddate}</td>
+                  <td style={{ fontWeight: '400' }}>${debt.initialamount}</td>
+                  <td style={{ fontWeight: '400' }}>${debt.amount}</td>
                   <td><Button variant="contained" color="primary" onClick={() => handleClickOpen(debt.id)}>Open</Button></td>
                 </tr>
               </tbody>
@@ -328,7 +433,7 @@ const SupplierInfo: React.FC = () => {
         </div>
       </Grid>
     </Grid>
- );
+  );
 };
 /* Dialog Bootstrap */
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({

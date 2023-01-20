@@ -105,14 +105,7 @@ router.post('/debt', async(req, res) => {
           "id": 0,
           "amount": "",
           "order_id": "",
-          "payments": [
-            [
-              {
-                "recordedDate": "",
-                "paidAmount": 0,
-              },
-            ]
-          ],
+          "payments": { "recordedDate": "", "paidAmount": 0 },
           "is_paid": false,
           "recordeddate": "",
           "supplier": "",
