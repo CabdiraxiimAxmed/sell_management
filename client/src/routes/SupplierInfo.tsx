@@ -8,11 +8,17 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Divider,
   TextField,
   IconButton,
   Paper,
+  TablePagination,
+  Table,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -22,7 +28,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import axios from 'axios';
 
 type OrderType = {
-  order_id: string;
+  id: string;
   supplier: string;
   purchase_status: string;
   total: string;
@@ -30,7 +36,7 @@ type OrderType = {
 };
 
 type ColumnDisplayType = {
-  order_id: boolean;
+  id: boolean;
   supplier: boolean;
   purchase_status: boolean;
   total: boolean;
@@ -52,18 +58,55 @@ type DebtType = {
   supplier: string;
   initialamount: string;
 };
+/*
+ * id  supplier purchase_status total  paid
+ * */
+interface Columns {
+  id:
+  | 'id'
+  | 'supplier'
+  | 'purchase_status'
+  | 'total'
+  | 'paid'
+  label: string;
+  minWidth?: number;
+  align?: 'right';
+  format?: (value: number) => string;
+}
+
 
 const SupplierInfo: React.FC = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [debtId, setDebtId] = useState<number>(0);
   const [date, setDate] = useState<string>('');
   const { name } = useParams();
 
-  const navigate = useNavigate();
+  const columns: readonly Columns[] = [
+    { id: 'id', label: 'id', minWidth: 100 },
+    { id: 'supplier', label: 'Supplier', minWidth: 170 },
+    { id: 'purchase_status', label: 'purchase_status', minWidth: 170, align: 'right' },
+    {
+      id: 'total',
+      label: 'total',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => `$${value.toLocaleString('en-US')}`,
+    },
+    {
+      id: 'paid',
+      label: 'paid',
+      minWidth: 100,
+      align: 'right',
+      format: (value: number) => `$${value.toLocaleString('en-US')}`,
+    }
+  ];
 
   const [orders, setOrders] = useState<OrderType[]>([
     {
-      order_id: '',
+      id: '',
       supplier: '',
       purchase_status: '',
       total: '',
@@ -110,8 +153,8 @@ const SupplierInfo: React.FC = () => {
 
         setDebts(res.data);
       })
-      .catch(err => {
-        toast.error('qalad ayaa dhacay');
+      .catch(error => {
+        toast.error(error.message);
       });
   }, []);
 
@@ -186,11 +229,23 @@ const SupplierInfo: React.FC = () => {
     return debt;
   };
 
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
   const sumTotalDebt = () => {
     let total: number = 0;
     for (let debt of debts) {
       total += parseFloat(debt.amount);
     }
+    if (!total) return 0;
     return total;
   };
 
@@ -260,7 +315,7 @@ const SupplierInfo: React.FC = () => {
       </Grid>
       <Grid item xs={6}>
         <div className="debt-amount-container">
-          <Typography variant="body2">Cadadka deynta</Typography>
+          <Typography variant="body2">Debt</Typography>
           <Typography variant="h5" style={{ fontWeight: 'bold' }}>
             <AttachMoneyIcon />
             {sumTotalDebt()}
@@ -270,44 +325,73 @@ const SupplierInfo: React.FC = () => {
       <Grid item xs={12}>
         <Typography variant="h4">Alaab ka gadatay</Typography>
       </Grid>
-      <Grid item xs={6}>
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                {Object.keys(orders[0]).map((column_head, index) => (
-                  <th key={index}>{column_head}</th>
-                ))}
-              </tr>
-            </thead>
-            {orders.map((order, index) => (
-              <tbody key={index}>
-                <tr>
-                  <td>
-                    {' '}
-                    <Button
-                      variant="text"
-                      onClick={() => goOrderPaper(order.order_id)}
+      <Grid item xs={12}>
+        <Paper style={{ marginTop: '10px', overflow: 'hidden' }} elevation={5}>
+          <TableContainer sx={{ transform: 'translateY(-30px)' }}
+          >
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  {columns.map(column => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{
+                        minWidth: column.minWidth,
+                        backgroundColor: 'black',
+                        color: 'white',
+                        fontWeight: 'bold',
+                      }}
                     >
-                      {order.order_id}
-                    </Button>
-                  </td>
-                  <td>{order.supplier}</td>
-                  <td>
-                    <Button
-                      variant="contained"
-                      color={findColor(order.purchase_status)}
+                      {column.label}
+                    </TableCell>
+                  ))}
+                  <TableCell
+                    align="left"
+                    style={{
+                      minWidth: 170,
+                      backgroundColor: 'black',
+                      color: 'white',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {orders
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row: OrderType, index: number) => (
+                    <TableRow
+                      hover
+                      role="row"
+                      tabIndex={-1}
+                      key={index}
                     >
-                      {order.purchase_status}
-                    </Button>
-                  </td>
-                  <td>${order.total}</td>
-                  <td>${order.paid}</td>
-                </tr>
-              </tbody>
-            ))}
-          </table>
-        </div>
+                      <TableCell className='table-cell'>
+                        <Button
+                          onClick={() => goOrderPaper(row.id)}
+                          variant='text'>{row.id}</Button>
+                      </TableCell>
+                      <TableCell className='table-cell'>{row.supplier}</TableCell>
+                      <TableCell align='right' className='table-cell'>{row.purchase_status ? "true" : 'false'}</TableCell>
+                      <TableCell className='table-cell' align="right"> $ {row.total} </TableCell>
+                      <TableCell className='table-cell' align="right"> $ {row.paid} </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              rowsPerPageOptions={[5, 25, 100]}
+              component="div"
+              count={orders.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableContainer>
+        </Paper>
       </Grid>
       <Grid item xs={12}>
         <Typography variant="h4">Deynta laguugu leeyahay</Typography>

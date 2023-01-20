@@ -11,7 +11,14 @@ type OrderType = {
   supplier: string,
   purchase_date: string,
   purchase_status: string,
-  items: { item: string, quantity: number, price: number, amount: number }[][],
+  items: [[{
+    name: string,
+    itemQuantity: number,
+    sale_price: number,
+    min_sale_price: number,
+    selling_price: number,
+    discount: number,
+  }]];
   whole_discount: string,
   total: string,
 };
@@ -35,7 +42,14 @@ const PurchasePaper: React.FC = () => {
       supplier: '',
       purchase_date: '',
       purchase_status: '',
-      items: [[{ item: '', quantity: 0, price: 0, amount: 0 }]],
+      items: [[{
+        name: '',
+        itemQuantity: 0,
+        sale_price: 0,
+        min_sale_price: 0,
+        selling_price: 0,
+        discount: 0,
+      }]],
       whole_discount: '',
       total: '',
     }
@@ -146,10 +160,11 @@ const PurchasePaper: React.FC = () => {
               {order[0].items[0].map((item, index) => (
                 <tbody key={index}>
                   <tr>
-                    <td>{item.item}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.price}</td>
-                    <td>{item.amount}</td>
+                    <td>{item.name}</td>
+                    <td>{item.itemQuantity}</td>
+                    <td>$ {item.sale_price}</td>
+                    <td>$ {item.discount}</td>
+                    <td>$ {item.selling_price}</td>
                   </tr>
                 </tbody>
               ))}

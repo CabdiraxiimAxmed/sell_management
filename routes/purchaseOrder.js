@@ -213,7 +213,7 @@ router.post('/get-supplier-transactions', async (req, res) => {
   const { name } = req.body;
   try {
     const resp = await client.query(
-      `SELECT order_id, supplier, purchase_status,total, paid FROM purchase_order WHERE supplier='${name}'`
+      `SELECT id, supplier, purchase_status,total, paid FROM purchase_order WHERE supplier='${name}'`
     );
     if (resp.rows.length === 0) {
       let result = [

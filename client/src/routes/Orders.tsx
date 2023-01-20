@@ -214,6 +214,9 @@ const Supplier: React.FC = () => {
   const supplierPage = (page: string) => {
       navigate(`/supplier-info/${page}`);
   };
+  const goOrder = (id: string) => {
+      navigate(`/purchase-order/${id}`);
+  };
 
 
   return (
@@ -338,7 +341,7 @@ const Supplier: React.FC = () => {
                       tabIndex={-1}
                       key={index}
                     >
-                      <TableCell align="right"> {row.id} </TableCell>
+                      <TableCell align="right"><Button onClick={() => goOrder(row.id)} variant='text'> {row.id} </Button></TableCell>
                       <TableCell onClick={() => supplierPage(row.supplier)}><Button variant='text'>{row.supplier}</Button></TableCell>
                       <TableCell> {row.purchase_date} </TableCell>
                       <TableCell> <Button
