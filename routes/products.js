@@ -40,7 +40,6 @@ router.get('/products-name', async (req, res) => {
     }
     res.send(result);
   } catch (err) {
-    console.log(err);
     res.send('err');
   }
 });
@@ -53,7 +52,6 @@ router.post('/update', async (req, res) => {
     );
     res.send('success');
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -66,7 +64,6 @@ router.post('/item', async (req, res) => {
     );
     res.send(item.rows);
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -90,7 +87,6 @@ router.post('/create', async (req, res) => {
     );
     res.send('success');
   } catch (err) {
-    console.error(err);
     res.send('error');
   }
 });

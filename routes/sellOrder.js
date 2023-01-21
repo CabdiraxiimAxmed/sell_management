@@ -3,12 +3,6 @@ const orderid = require('order-id')('ahmed');
 const client = require('../models/connect');
 const router = express.Router();
 
-router.get('/debt', async (req, res) => {
-  console.log('router');
-  let resp = await client.query('SELECT * FROM sell_debt');
-  res.send(resp.rows);
-})
-
 router.get('/', async (req, res) => {
   try {
     let resp = await client.query('SELECT * FROM sell_order');
@@ -126,7 +120,6 @@ router.post('/revenue', async (req, res) => {
     }
     res.send(result);
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -147,12 +140,10 @@ router.post('/sell-order', async (req, res) => {
       await client.query(`INSERT INTO sell_debt (sell_id, amount, is_paid, recordeddate, customer, initialAmount) VALUES('${order_id}', '${total}', '${false}', '${recordedDate}', '${customer}', '${total}')`);
     }
     for (let item of products) {
-      console.log({ name: item.name, quantity: item.quantity });
       await client.query(`UPDATE products set units=units-'${item.quantity}' WHERE name='${item.item}'`);
     }
     res.send('success');
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -166,7 +157,6 @@ router.post('/pay', async (req, res) => {
     await client.query(`UPDATE sell_order SET paid='${paidAmount}' WHERE order_id='${order_id}'`);
     res.send('success');
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });

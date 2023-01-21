@@ -26,7 +26,6 @@ router.get('/supplier-name', async (req, res) => {
     }
     res.send(result);
   } catch (err) {
-    console.log(err);
     res.send('err');
   }
 });
@@ -62,7 +61,6 @@ router.post('/update-supplier', async (req, res) => {
     const resp = await client.query(`UPDATE supplier SET name='${name}',  contact='${contact}', address='${address}' WHERE id='${id}'`);
     res.send('success');
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -88,7 +86,6 @@ router.post('/get-supplier', async (req, res) => {
     }
     res.send(resp.rows);
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });

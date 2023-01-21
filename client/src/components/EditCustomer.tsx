@@ -47,10 +47,8 @@ const EditCustomer: React.FC<Props> = ({ customer }) =>{
              }, 2000);
            };
          })
-         .catch(err => {
-           console.log('this is the error');
-           console.log(err);
-           toast.error('qalada ayaa dhacay');
+         .catch(error => {
+           toast.error(error.message);
          })
   };
 

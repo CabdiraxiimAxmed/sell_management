@@ -136,9 +136,8 @@ const Supplier: React.FC = () => {
         setOrders(res.data);
         setOrdersStore(res.data);
       })
-      .catch(err => {
-        // toast if there is an error
-        console.log(err);
+      .catch(error => {
+        toast.error(error.message);
       });
   }, []);
 

@@ -58,15 +58,15 @@ const PurchaseOrder: React.FC = () => {
          .then(res => {
            setProductNames(res.data);
          })
-         .catch(err => {
-           console.log('error happened');
+         .catch(error => {
+           toast.error(error.message);
          })
     axios.get('/supplier/supplier-name')
          .then(res => {
            setSupplierNames(res.data);
          })
-         .catch(err => {
-           console.log('error happened');
+         .catch(error => {
+           toast.error(error.message);
          })
     axios.get(`/purchase/orders/${order_id}`)
          .then(res => {
@@ -74,8 +74,8 @@ const PurchaseOrder: React.FC = () => {
            setCount(counter);
            setOrders(res.data);
          })
-         .catch(err => {
-           console.log('error happened');
+         .catch(error => {
+           toast.error(error.message);
          });
   }, []);
 
@@ -100,7 +100,6 @@ const PurchaseOrder: React.FC = () => {
         return;
       }
       let item = {"item": data.get(`item${i}`), "quantity": itemQuantity, "price": itemPrice, amount}
-      console.log({ item });
       items.push(item);
     }
 

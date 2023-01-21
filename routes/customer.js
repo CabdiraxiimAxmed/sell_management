@@ -22,7 +22,6 @@ router.post('/name', async(req, res) => {
 
   try {
     const resp = await client.query(`SELECT * FROM customer WHERE name='${name}'`);;
-    console.log(resp.rows);
     if (resp.rows.length === 0) {
       let result = [
         {

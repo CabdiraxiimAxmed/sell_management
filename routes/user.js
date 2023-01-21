@@ -91,7 +91,6 @@ router.post('/update-user', async (req, res) => {
     );
     res.send('success');
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });

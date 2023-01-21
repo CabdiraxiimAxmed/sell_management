@@ -106,7 +106,6 @@ router.post('/expense', async (req, res) => {
       return;
     }
     const days = daysNo[splitted[0]];
-    console.log({ splitted, days });
     let result = [];
     for (let i = 1; i <= days; i++) {
       let day = i < 10 ? `0${i}` : i;
@@ -118,12 +117,10 @@ router.post('/expense', async (req, res) => {
       result.push(...resp.rows);
     }
     if (result.length == 0) {
-      console.log('no data');
       result = [{ order_id: '', paid: '', total: '', order_date: '' }];
     }
     res.send(result);
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -154,7 +151,6 @@ router.post('/purchase-order', async (req, res) => {
     );
     res.send('success');
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -169,7 +165,6 @@ router.post('/debt', async (req, res) => {
     await client.query(`UPDATE purchase_order set is_debt='${true}' WHERE id='${order_id}'`)
     res.send('success')
   } catch (err) {
-    console.log(err);
     res.send("error");
   }
 });
@@ -187,7 +182,6 @@ router.post('/received', async (req, res) => {
     );
     res.send('success');
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -210,7 +204,6 @@ router.post('/payment', async (req, res) => {
       await client.query(`UPDATE purchase_order set paid='${paid}' WHERE id='${id}'`)
     res.send('success');
   } catch (err) {
-    console.log(err);
     res.send("error");
   }
 });
@@ -224,7 +217,6 @@ router.post('/edit', (req, res) => {
     taxAmount,
     total,
   } = req.body;
-  console.log({ supplier, status, items, discount, taxAmount, total });
   res.send('success');
 });
 
@@ -289,7 +281,6 @@ router.post('/get-debt-transaction', async (req, res) => {
     }
     res.send(resp.rows);
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -323,7 +314,6 @@ router.post('/get-debt-supplier', async (req, res) => {
     }
     res.send(resp.rows);
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });

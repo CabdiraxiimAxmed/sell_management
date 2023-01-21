@@ -151,8 +151,6 @@ const SupplierInfo: React.FC = () => {
       });
   }, []);
 
-  console.log(debts);
-
   const findDebtByDate = () => {
     if (!date) {
       axios

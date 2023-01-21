@@ -28,7 +28,6 @@ export default function SignInSide() {
     axios
       .post('api/user/login', { username, password })
       .then(res => {
-        console.log('after post');
         if (res.data == 'not_found') {
           toast.error('xisaabkan ma abuurno!!');
           return;

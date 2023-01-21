@@ -77,7 +77,6 @@ const PurchasePaper: React.FC = () => {
                toast.error("SERVER: qalad ayaa dhacay");
                return;
              }
-             console.log(res.data);
              setCustomer(res.data);
            }) .catch(error => {
              toast.error(error.message);

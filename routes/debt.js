@@ -40,7 +40,6 @@ router.post('/sells/date', async(req, res) => {
     }
     res.send(result);
   } catch(err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -76,8 +75,6 @@ router.post('/purchase/date', async(req, res) => {
 
       const resp = await client.query(`SELECT supplier, initial_amount, recorded_date FROM purchase_debt WHERE recorded_date LIKE '%${date}%' AND is_paid='${false}'`);
       if(resp.rows.length === 0) continue;
-      console.log('this')
-      console.log(resp.rows);
       result.push(...resp.rows);
     }
     if(result.length == 0) {
@@ -85,7 +82,6 @@ router.post('/purchase/date', async(req, res) => {
     }
     res.send(result);
   } catch(err) {
-    console.log(err);
     res.send('error');
   }
 });

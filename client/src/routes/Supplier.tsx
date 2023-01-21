@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
 import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
@@ -66,8 +67,8 @@ const Supplier: React.FC = () => {
         setSuppliers(res.data);
         setSuppliersStore(res.data);
       })
-      .catch(err => {
-        console.log(err);
+      .catch(error => {
+        toast.error(error.message);
       });
   }, []);
 
@@ -115,6 +116,18 @@ const Supplier: React.FC = () => {
 
   return (
     <>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <Stack
         direction="row"
         alignItems="center"

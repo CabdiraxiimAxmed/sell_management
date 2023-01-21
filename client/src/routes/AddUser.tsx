@@ -10,7 +10,6 @@ const AddUser: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(e);
     let permissions = [];
     const data = new FormData(e.currentTarget);
     let name = data.get('name');

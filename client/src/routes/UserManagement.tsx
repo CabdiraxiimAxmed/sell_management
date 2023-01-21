@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
@@ -71,8 +72,8 @@ const UserManagement: React.FC = () => {
         setUsers(res.data);
         setUsersStore(res.data);
       })
-      .catch(err => {
-        console.log(err);
+      .catch(error => {
+        toast.error(error.message);
       });
   }, []);
 
@@ -91,7 +92,6 @@ const UserManagement: React.FC = () => {
   const filterUser = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     const filtered = usersStore.filter((user: UserType) => {
-      console.log(user.name, term);
       return user.name.toLowerCase().includes(term.toLowerCase());
     });
     if (!filtered.length) {
@@ -122,6 +122,18 @@ const UserManagement: React.FC = () => {
 
   return (
     <>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <Stack
         direction="row"
         alignItems="center"
