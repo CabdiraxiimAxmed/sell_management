@@ -57,12 +57,12 @@ const Home: React.FC = () => {
     useState<string>(currentMonth);
   const [monthSupplierDebt, setMonthSupplierDebt] =
     useState<string>(currentMonth);
-  const [monthExpense, setMonthExpense] = useState<string>("12 2022");
+  const [monthExpense, setMonthExpense] = useState<string>("01 2023");
   const [dateRevenue, setDateRevenue] = useState<string>("");
   const [dateExpense, setDateExpense] = useState<string>("");
   const [dateCustomerDebt, setDateCustomerDebt] = useState<string>("");
   const [dateSupplierDebt, setDateSupplierDebt] = useState<string>("");
- useEffect(() => {
+  useEffect(() => {
     axios.post("http://localhost:2312/sell/revenue", { dateStr: monthRevenue }).then((res) => {
       if (res.data == "error") {
         toast.error("SERVER: qalad ayaa dhacay");
@@ -70,7 +70,7 @@ const Home: React.FC = () => {
       }
       setRevenues(res.data);
     })
-    .catch(error => {
+      .catch(error => {
         toast.error(error.message)
       })
 
@@ -108,15 +108,15 @@ const Home: React.FC = () => {
       }
       setExpenses(res.data);
     })
-    .catch(error => {
-      toast.error(error.message);
-    })
+      .catch(error => {
+        toast.error(error.message);
+      })
   }, []);
 
   const getRest = (total: string, paid: string) => {
     let totalAmount: number = parseFloat(total);
     let paidAmount: number = parseFloat(paid);
-    if (isNaN(totalAmount))totalAmount = 0;
+    if (isNaN(totalAmount)) totalAmount = 0;
     if (isNaN(paidAmount)) paidAmount = 0;
     return totalAmount - paidAmount;
   };
@@ -155,7 +155,7 @@ const Home: React.FC = () => {
       totalExpense += Math.floor(exp * 100) / 100;
     }
     for (let expense of expenses) {
-      let exp: number =  parseFloat(expense.paid);
+      let exp: number = parseFloat(expense.paid);
       if (!exp) exp = 0;
       paidExpense += Math.floor(exp * 100) / 100;
     }
@@ -296,8 +296,8 @@ const Home: React.FC = () => {
                     <th>created_date</th>
                   </tr>
                 </thead>
-                {revenues.map((revenue, index) => (
-                  <tbody>
+                {revenues.map((revenue, index: number) => (
+                  <tbody key={index}>
                     <tr>
                       <td>
                         {" "}
@@ -361,8 +361,8 @@ const Home: React.FC = () => {
                     <th>recorded_date</th>
                   </tr>
                 </thead>
-                {customerDebts.map((debt, index) => (
-                  <tbody>
+                {customerDebts.map((debt, index: number) => (
+                  <tbody key={index}>
                     <tr>
                       <td>
                         {" "}
@@ -486,8 +486,8 @@ const Home: React.FC = () => {
                     <th>recorded_date</th>
                   </tr>
                 </thead>
-                {supplierDebts.map((debt, index) => (
-                  <tbody>
+                {supplierDebts.map((debt, index: number) => (
+                  <tbody key={index}>
                     <tr>
                       <td>
                         {" "}

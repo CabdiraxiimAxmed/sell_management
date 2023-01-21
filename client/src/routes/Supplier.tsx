@@ -174,8 +174,8 @@ const Supplier: React.FC = () => {
           <table>
             <thead>
               <tr>
-                {Object.keys(suppliers[0]).map((column_head, index) => (
-                  <th className={display(column_head) ? '' : 'inactive'}>
+                {Object.keys(suppliers[0]).map((column_head, index: number) => (
+                  <th key={index} className={display(column_head) ? '' : 'inactive'}>
                     {column_head}
                   </th>
                 ))}

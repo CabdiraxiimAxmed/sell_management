@@ -431,8 +431,8 @@ const SupplierInfo: React.FC = () => {
                 <th>paid</th>
               </tr>
             </thead>
-            {debts.map((debt, index) => (
-              <tbody>
+            {debts.map((debt, index: number) => (
+              <tbody key={index}>
                 <tr>
                   <td>{debt.id}</td>
                   <td>

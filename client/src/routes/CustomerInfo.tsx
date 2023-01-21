@@ -438,8 +438,8 @@ const SupplierInfo: React.FC = () => {
                 <th>hartay</th>
               </tr>
             </thead>
-            {debts.map((debt, index) => (
-              <tbody>
+            {debts.map((debt, index: number) => (
+              <tbody key={index}>
                 <tr>
                   <td>{debt.id}</td>
                   <td> <Button variant="text" onClick={() => goOrderPaper(debt.sell_id)}>{debt.sell_id}</Button></td>

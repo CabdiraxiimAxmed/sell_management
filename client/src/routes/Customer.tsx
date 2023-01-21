@@ -6,7 +6,7 @@ import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
-import {Stack, Typography, Button } from '@mui/material';
+import { Stack, Typography, Button } from '@mui/material';
 
 import AddCustomer from '../components/AddCustomer';
 
@@ -65,13 +65,13 @@ const Customers: React.FC = () => {
   });
   useEffect(() => {
     axios.get('http://localhost:2312/customers')
-         .then(res => {
-           setCustomers(res.data);
-           setCustomersStore(res.data);
-         })
-         .catch(error => {
-           toast.error(error.message);
-         })
+      .then(res => {
+        setCustomers(res.data);
+        setCustomersStore(res.data);
+      })
+      .catch(error => {
+        toast.error(error.message);
+      })
   }, [])
 
   const handleClick = (e: React.ChangeEvent<HTMLInputElement>) => { // change function name
@@ -131,64 +131,64 @@ const Customers: React.FC = () => {
       />
       {addCustomer && <AddCustomer />}
       {/* {editCustomer && <EditCustomer />} */}
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5} style={{marginBottom : 9}}>
-          <Typography variant="h5" gutterBottom>
-            Macaamiisha
-          </Typography>
-          <Button variant="contained" onClick={() => setAddCustomer(!addCustomer) } startIcon={<AddIcon />} style={{backgroundColor:"#2367d1", fontWeight: 'bold'}}>
-            macamiil
-          </Button>
-        </Stack>
-  <div className="container">
-      <div className="search-filters-container">
-        <input placeholder="search" className="search" onChange={filterUser}/>
-        <div className="filters-container">
-          <div className="dropdown">
-            <button className="dropBtn"><ViewWeekIcon/> columns</button>
-            <div className="dropdown-content">
-              {Object.keys(customers[0]).map((column_head: string, index: number) => (
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    name={column_head}
-                    className="checkbox"
-                    onChange={handleClick}
-                  checked={columnDisplay[column_head as keyof ColumnDisplayType]}
-                  />
-                  <span>{column_head}</span>
-                </label>
-              ))}
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5} style={{ marginBottom: 9 }}>
+        <Typography variant="h5" gutterBottom>
+          Macaamiisha
+        </Typography>
+        <Button variant="contained" onClick={() => setAddCustomer(!addCustomer)} startIcon={<AddIcon />} style={{ backgroundColor: "#2367d1", fontWeight: 'bold' }}>
+          macamiil
+        </Button>
+      </Stack>
+      <div className="container">
+        <div className="search-filters-container">
+          <input placeholder="search" className="search" onChange={filterUser} />
+          <div className="filters-container">
+            <div className="dropdown">
+              <button className="dropBtn"><ViewWeekIcon /> columns</button>
+              <div className="dropdown-content">
+                {Object.keys(customers[0]).map((column_head: string, index: number) => (
+                  <label key={index} className="switch">
+                    <input
+                      type="checkbox"
+                      name={column_head}
+                      className="checkbox"
+                      onChange={handleClick}
+                      checked={columnDisplay[column_head as keyof ColumnDisplayType]}
+                    />
+                    <span>{column_head}</span>
+                  </label>
+                ))}
+              </div>
             </div>
+            <button onClick={handlePrint} className="dropBtn"><DownloadIcon /> export</button>
           </div>
-    <button onClick={handlePrint} className="dropBtn"><DownloadIcon/> export</button>
+        </div>
+        <div ref={componentRef} className="table-container">
+          <table>
+            <thead>
+              <tr>
+                {Object.keys(customers[0]).map((column_head, index: number) => (
+                  <th key={index} className={display(column_head) ? '' : 'inactive'}>{column_head}</th>
+                ))}
+              </tr>
+            </thead>
+
+            {customers.map((customer: CustomerType, index: number) => (
+              <tbody key={index}>
+                <tr onClick={() => updateSupplier(customer.name)}>
+                  <td className={display('id') ? '' : 'inactive'}>{customer.id}</td>
+                  <td className="user-name">{customer.name}</td>
+                  <td className={display('contact') ? '' : 'inactive'}>{customer.contact}</td>
+                  <td className={display('address') ? '' : 'inactive'}>{customer.address}</td>
+                  <td className={display('created_date') ? '' : 'inactive'}>{customer.created_date}</td>
+                  <td className={display('email') ? '' : 'inactive'}>{customer.email}</td>
+                  <td className={display('city') ? '' : 'inactive'}>{customer.city}</td>
+                </tr>
+              </tbody>
+            ))}
+          </table>
         </div>
       </div>
-      <div ref={componentRef} className="table-container">
-        <table>
-          <thead>
-            <tr>
-              {Object.keys(customers[0]).map((column_head, index) => (
-                <th className={display(column_head)? '': 'inactive'}>{column_head}</th>
-              ))}
-            </tr>
-          </thead>
-
-          {customers.map((customer: CustomerType, index: number) => (
-            <tbody key={index}>
-              <tr onClick={() => updateSupplier(customer.name) }>
-                <td className={display('id')? '': 'inactive'}>{customer.id}</td>
-                <td className="user-name">{customer.name}</td>
-                <td className={display('contact')? '': 'inactive'}>{customer.contact}</td>
-                <td className={display('address')? '': 'inactive'}>{customer.address}</td>
-                <td className={display('created_date')? '': 'inactive'}>{customer.created_date}</td>
-                <td className={display('email')? '': 'inactive'}>{customer.email}</td>
-                <td className={display('city')? '': 'inactive'}>{customer.city}</td>
-              </tr>
-            </tbody>
-          ))}
-        </table>
-      </div>
-    </div>
 
     </>
   );
