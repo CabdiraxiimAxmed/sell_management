@@ -17,6 +17,7 @@ import UpdateUser from './routes/UpdateUser';
 import Sell from './routes/Sell';
 import UserManagement from './routes/UserManagement';
 import SupplierInfo from './routes/SupplierInfo';
+import ProductInfo from './routes/ProductInfo';
 import CustomerInfo from './routes/CustomerInfo';
 import ProtectedRoute from './app/ProtectedRoutes';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -40,6 +41,10 @@ function App() {
           <Route
             path="/products"
             element={<Header children={<Inventory />} />}
+          />
+          <Route
+            path="/products/:name"
+            element={<Header children={<ProductInfo />} />}
           />
           <Route
             path="/products/add-product"

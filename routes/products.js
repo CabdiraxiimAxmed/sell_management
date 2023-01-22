@@ -26,6 +26,32 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get("/:name", async(req, res) => {
+  let { name } = req.params;
+  try {
+    let item = await client.query(`SELECT * FROM products WHERE name='${name}'`);
+    if(item.rows.length === 0) {
+      return res.send({
+        id:0,
+        name:"",
+        units:"",
+        category:"",
+        sub_category:"",
+        alert_quantity:"",
+        purchase_cost:"",
+        sale_price:"",
+        min_sale_price:"",
+        min_quantity_order:"",
+        bar_code:"",
+        created_date:""
+      }).end();
+    }
+    res.send(item.rows[0]).end();
+  } catch(err) {
+    res.send("error").end();
+  }
+})
+
 router.get('/products-name', async (req, res) => {
   try {
     let result = [];
@@ -45,10 +71,20 @@ router.get('/products-name', async (req, res) => {
 });
 
 router.post('/update', async (req, res) => {
-  let { id, name, alertquantity, price, barcode } = req.body;
+  let {id, name, units, category, subCategory, alertQuantity, barCode, salePrice, purchaseCost, minSalePrice, minQntyOrder } = req.body;
   try {
     await client.query(
-      `UPDATE products SET name='${name}', alertquantity='${alertquantity}', price='${price}', barcode='${barcode}' WHERE id='${id}'`
+      `UPDATE products SET name='${name}',
+      alert_quantity='${alertQuantity}',
+      sale_price='${salePrice}',
+      bar_code='${barCode}',
+      category='${category}',
+      sub_category='${subCategory}',
+      units='${units}',
+      min_sale_price='${minSalePrice}',
+      min_quantity_order='${minQntyOrder}',
+      purchase_cost='${purchaseCost}'
+      WHERE id='${id}'`
     );
     res.send('success');
   } catch (err) {

@@ -185,6 +185,10 @@ const Products: React.FC = () => {
     setPage(0);
   };
 
+  const goItemPage = (name: string) => {
+    navigate(`/products/${name}`);
+  }
+
   return (
     <>
       <ToastContainer
@@ -215,7 +219,7 @@ const Products: React.FC = () => {
           startIcon={<AddIcon />}
           style={{ backgroundColor: '#2367d1', fontWeight: 'bold' }}
         >
-          badeeco
+          product
         </Button>
       </Stack>
       <div className="container">
@@ -268,6 +272,7 @@ const Products: React.FC = () => {
                       hover
                       role="checkbox"
                       tabIndex={-1}
+                      onClick={() => goItemPage(row.name)}
                       key={index}
                     >
                       {columns.map((column: Columns, index: number) => {
