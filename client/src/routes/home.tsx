@@ -38,6 +38,8 @@ type SupplierDebtType = {
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const month = moment().format("MMMM");
+  let date = new Date();
+  let expenseCurrentMonth = date.getMonth() + 1;
   const year = moment().format("YYYY");
   let currentMonth = `${month} ${year}`;
   const [revenues, setRevenues] = useState<RevenueType[]>([
@@ -55,9 +57,10 @@ const Home: React.FC = () => {
   const [monthRevenue, setMonthRevenue] = useState<string>(currentMonth);
   const [monthCustomerDebt, setMonthCustomerDebt] =
     useState<string>(currentMonth);
-  const [monthSupplierDebt, setMonthSupplierDebt] =
-    useState<string>(currentMonth);
-  const [monthExpense, setMonthExpense] = useState<string>("01 2023");
+  const [monthSupplierDebt, setMonthSupplierDebt] = useState<string>(currentMonth);
+  const [monthExpense, setMonthExpense] = useState<string>(
+      `${expenseCurrentMonth < 10 ? '0' + expenseCurrentMonth: expenseCurrentMonth} ${date.getFullYear()}`
+  );
   const [dateRevenue, setDateRevenue] = useState<string>("");
   const [dateExpense, setDateExpense] = useState<string>("");
   const [dateCustomerDebt, setDateCustomerDebt] = useState<string>("");
@@ -187,7 +190,7 @@ const Home: React.FC = () => {
       .post("http://localhost:2312/debt/sells/date", { dateStr: dateCustomerDebt })
       .then((res) => {
         if (res.data == "error") {
-          toast.error("SERVER: qalad ayaa dhacay");
+          toast.error("server error");
           return;
         }
         if (res.data === "correct") {
@@ -206,7 +209,7 @@ const Home: React.FC = () => {
       .post("http://localhost:2312/debt/purchase/date", { dateStr: dateSupplierDebt })
       .then((res) => {
         if (res.data == "error") {
-          toast.error("SERVER: qalad ayaa dhacay");
+          toast.error("Server error");
           return;
         }
         if (res.data === "correct") {
