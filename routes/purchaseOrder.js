@@ -80,6 +80,29 @@ router.get('/orders/:order_id', async (req, res) => {
     res.send('err');
   }
 });
+
+router.post('/order/update', async(req, res) => {
+  let {id, supplier, purchase_date, purchase_status, items, total, paid, is_debt } = req.body;
+  let formatItemArray = JSON.stringify(items[0]);
+  console.log(formatItemArray);
+  try {
+    await client.query(`UPDATE purchase_order set 
+      supplier='${supplier}',
+      purchase_date='${purchase_date}',
+      purchase_status='${purchase_status}',
+      items=array['${formatItemArray}']::json[],
+      total='${total}',
+      paid='${paid}',
+      is_debt='${is_debt}'
+      WHERE id='${id}'
+    `)
+    res.send('success')
+  } catch(err) {
+    console.log(err);
+    res.send('error');
+  }
+});
+
 router.post('/expense', async (req, res) => {
   let { dateStr } = req.body;
   let daysNo = {

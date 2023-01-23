@@ -104,6 +104,21 @@ router.post('/item', async (req, res) => {
   }
 });
 
+router.post('/item/quantity/update', async(req, res) => {
+  let { name, quantity, status } = req.body;
+  console.log({ name, quantity, status });
+  try {
+    if(status === 'subtr') {
+      await client.query(`UPDATE products set units=units-'${quantity}' WHERE name='${name}'`);
+    } else if (status === 'add') {
+      await client.query(`UPDATE products set units=units+'${quantity}' WHERE name='${name}'`);
+    }
+  } catch(err) {
+    console.log(err);
+    res.send('error');
+  }
+})
+
 router.post('/create', async (req, res) => {
   const {
     name,

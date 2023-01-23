@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import BoltIcon from '@mui/icons-material/Bolt';
 import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -436,6 +437,10 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total, supplier, 
       })
   }
 
+  const editOrder = () => {
+      navigate(`/purchase/edit/${id}`)
+    };
+
   const deleteOrder = () => {
     axios.post('http://localhost:2312/purchase/delete', { id: id })
       .then(resp => {
@@ -450,10 +455,14 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total, supplier, 
       })
       ;
   }
+
   const handleClose = (action: string) => {
     switch (action) {
       case "view":
         viewOrder();
+        break;
+      case "edit":
+        editOrder();
         break;
       case "paid":
         paidOrder();
@@ -489,6 +498,10 @@ const OrderMenuButton: React.FC<OrderMenuProps> = ({ id, paid, total, supplier, 
         <MenuItem onClick={() => handleClose("view")} disableRipple>
           <ViewWeekIcon />
           View
+        </MenuItem>
+        <MenuItem onClick={() => handleClose("edit")} disableRipple>
+          <EditIcon />
+          Edit
         </MenuItem>
         <MenuItem disabled={isDisablePaid()} onClick={() => handleClose("paid")} disableRipple>
           <PaidIcon />

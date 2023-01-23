@@ -162,7 +162,7 @@ const Supplier: React.FC = () => {
               <div className="dropdown-content">
                 {Object.keys(suppliers[0]).map(
                   (column_head: string, index: number) => (
-                    <label className="switch">
+                    <label key={index} className="switch">
                       <input
                         type="checkbox"
                         name={column_head}
@@ -196,7 +196,7 @@ const Supplier: React.FC = () => {
             </thead>
 
             {suppliers.map((supplier, index) => (
-              <tbody>
+              <tbody key={index}>
                 <tr onClick={() => updateSupplier(supplier.name)}>
                   <td className={display('id') ? '' : 'inactive'}>
                     {supplier.id}

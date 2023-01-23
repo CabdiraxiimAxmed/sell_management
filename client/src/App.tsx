@@ -8,7 +8,7 @@ import Home from './routes/home';
 import Supplier from './routes/Supplier';
 import Orders from './routes/Orders';
 import PurchaseOrder from './routes/PurchaseOrder';
-import PurchaseEdit from './routes/PurchaseEdit';
+import EditPurchase from './routes/EditPurchase';
 import PurchasePaper from './routes/PurchasePaper';
 import SellPaper from './routes/SellPaper';
 import Inventory from './routes/Inventory';
@@ -105,8 +105,8 @@ function App() {
               element={<Header children={<PurchaseOrder />} />}
             />
             <Route
-              path="/purchase/edit/:order_id"
-              element={<Header children={<PurchaseEdit />} />}
+              path="/purchase/edit/:id"
+              element={<Header children={<EditPurchase />} />}
             />
             <Route
               path="/purchase-order/:order_id"
