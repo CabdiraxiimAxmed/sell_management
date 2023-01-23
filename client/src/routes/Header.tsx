@@ -1,5 +1,7 @@
-import * as React from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
 import { RootState } from '../app/store';
 import AccessibilityIcon from '@mui/icons-material/Accessibility';
@@ -13,6 +15,7 @@ import BorderClearIcon from '@mui/icons-material/BorderClear';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -104,6 +107,8 @@ interface MiniProps {
   children: any;
 }
 const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
+  const [cookie, setCookie] = useCookies<string>(['']);
+  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.user.value);
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -123,6 +128,11 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const logout = () => {
+    setCookie('login', '', {path: '/'});
+    navigate('/galid');
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -144,12 +154,18 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
           <Typography variant="h6" noWrap component="div">
             Mini variant drawer
           </Typography>
+          <Button
+            variant='contained'
+            color='secondary'
+            onClick={logout}
+            style={{ transform: 'translateX(45rem)' }}
+            >logout</Button>
           <Typography
             variant="h6"
             noWrap
             component="button"
             className="user-management-container"
-            style={{ transform: 'translateX(60rem)' }}
+            style={{ transform: 'translateX(50rem)' }}
           >
             <PersonIcon />
             {user.username}

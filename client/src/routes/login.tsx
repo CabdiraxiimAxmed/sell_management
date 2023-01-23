@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { setUser } from '../features/user';
 import axios from 'axios';
@@ -14,6 +15,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 
 export default function SignInSide() {
+  const [ cookie, setCookie] = useCookies<string>(['']);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -39,7 +41,11 @@ export default function SignInSide() {
           return;
         }
         dispatch(setUser(res.data));
-        navigate('/');
+        setCookie('login', res.data.username, {
+           path: '/',
+           maxAge: 86400,
+        })
+        navigate('/products');
       })
       .catch(err => {
         toast.error(err.message);
