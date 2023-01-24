@@ -105,17 +105,14 @@ router.post('/item', async (req, res) => {
 });
 
 router.post('/item/quantity/update', async(req, res) => {
-  let { name, quantity, status } = req.body;
-  console.log({ name, quantity, status });
+  let { removedItems } = req.body;
   try {
-    if(status === 'subtr') {
-      await client.query(`UPDATE products set units=units-'${quantity}' WHERE name='${name}'`);
-    } else if (status === 'add') {
-      await client.query(`UPDATE products set units=units+'${quantity}' WHERE name='${name}'`);
+    for(let item of removedItems) {
+      await client.query(`UPDATE products set units=units-'${item.quantity}' WHERE name='${item.name}'`);
     }
+    res.send('success').end();
   } catch(err) {
-    console.log(err);
-    res.send('error');
+    res.send('error').end();
   }
 })
 

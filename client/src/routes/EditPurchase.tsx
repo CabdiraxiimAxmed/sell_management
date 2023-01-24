@@ -33,6 +33,7 @@ type Item = {
 const EditPurchase: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [removedItems, setRemovedItems] = useState<{name: string, quantity: number}[]>([]);
   const [order, setOrder] = useState<any>({});
   useEffect(() => {
     axios.get(`http://localhost:2312/purchase/orders/${id}`)
@@ -60,93 +61,49 @@ const EditPurchase: React.FC = () => {
       toast.warn('Please complete the information.');
       return;
     }
-    let sendData = {id: order.id, supplier, purchase_date, purchase_status, items: order.items, total, paid, is_debt };
+    let sendData = { id: order.id, supplier, purchase_date, purchase_status, items: order.items, total, paid, is_debt };
     axios.post('http://localhost:2312/purchase/order/update', sendData)
       .then(resp => {
         if (resp.data === 'error') {
           toast.error("server error");
           return;
+        } else if (resp.data === 'success') {
+          if(removedItems.length !== 0 && purchase_status === 'received') {
+            axios.post('http://localhost:2312/products/item/quantity/update', { removedItems })
+              .then(resp => {
+                if (resp.data === 'error') {
+                  toast.error('server error');
+                  return;
+                }
+                toast.success('success');
+                setTimeout(() => {
+                  navigate('/orders');
+                }, 2000);
+              }).catch(error => {
+                toast.error(error.message);
+              })
+          } else {
+            toast.success('success');
+            setTimeout(() => {
+              navigate('/orders');
+            }, 2000);
+          }
         }
-        toast.success('success');
-        setTimeout(() => {
-          navigate('/orders');
-        }, 2000);
       }).catch(error => {
         toast.error(error.message);
       });
   };
 
-  const handlePurchaseQuantityChange = (name: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    let value  = parseFloat(event.target.value);
-    if (isNaN(value)) value = 1;
-    //axios.post('http://localhost:2312/items/quantity/update', { name, quantity })
-    let items: any = order.items;
-//    let item = items[0].filter((item: Item) => item.name === name);
- //   let quantity: number = item[0].itemQuantity;
-    let prevQuantity: number = 0;
-    let postQuantity: number = 0;
-    items[0].filter((item: Item) => {
-      prevQuantity = item.itemQuantity;
-      item.itemQuantity = value;
-      postQuantity = item.itemQuantity;
-      item.selling_price = Math.floor((item.itemQuantity * item.sale_price - item.discount) * 100) / 100;
-      return item.name == name
-    });
-    if(prevQuantity > postQuantity) {
-      console.log('subtr', prevQuantity - postQuantity)
-      axios.post('http://localhost:2312/products/item/quantity/update', { name, quantity: prevQuantity - postQuantity, status: 'subtr' })
-        .then(resp => {
-          if (resp.data === 'error') {
-            toast.error('server error');
-            return;
-          }
-        }).catch(error => {
-          toast.error(error.message);
-        })
-    } else if (prevQuantity < postQuantity) {
-      console.log('add', postQuantity - prevQuantity)
-      axios.post('http://localhost:2312/products/item/quantity/update', { name, quantity: postQuantity - prevQuantity, status: 'add' })
-        .then(resp => {
-          if (resp.data === 'error') {
-            toast.error('server error');
-            return;
-          }
-        }).catch(error => {
-          toast.error(error.message);
-        })
-  }
-    setOrder({...order, ['items']: items})
-  }
 
-  const handlePurchaseDiscountChange = (name: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    let value  = parseFloat(event.target.value);
-    if (isNaN(value)) value = 0;
-    let items: any = order.items;
-    items[0].filter((item: Item) => {
-      item.discount = value;
-      item.selling_price = Math.floor((item.itemQuantity * item.sale_price - item.discount) * 100) / 100;
-      return item.name == name
-    });
-    setOrder({...order, ['items']: items})
-  }
 
-  const removeItem = (name: string) => { 
+  const removeItem = (name: string) => {
     let items: any = order.items[0];
-    if(items.length === 1) return;
+    if (items.length === 1) return;
     let finalItems: any = items.filter((item: Item) => item.name !== name);
-    let removedItem: any = items.filter((item: Item) => item.name === name);
-    axios.post('http://localhost:2312/products/item/quantity/update', {
-        name: removedItem[0].name,
-        quantity: removedItem[0].itemQuantity, status: 'subtr' })
-      .then(resp => {
-        if (resp.data === 'error') {
-          toast.error('server error');
-          return;
-        }
-      }).catch(error => {
-        toast.error(error.message);
-      })
-    setOrder({...order, ['items']: [finalItems]})
+    let poppedItem: any = items.filter((item: Item) => item.name === name);
+    //setSendData({ name: removedItem[0].name, quantity: removedItem[0].itemQuantity, status: 'subtr' });
+    setRemovedItems([...removedItems, { name: poppedItem[0].name, quantity: poppedItem[0].itemQuantity }]);
+    setOrder({ ...order, ['items']: [finalItems] })
   };
 
   return (
@@ -259,7 +216,7 @@ const EditPurchase: React.FC = () => {
           </Grid>
         </Grid>
       </Paper>}
-      <p style={{ fontWeight: 'bold'}}>Items</p>
+      <p style={{ fontWeight: 'bold' }}>Items</p>
       {order.purchase_date && <Paper elevation={15} >
         <Grid container>
           <Grid item xs={2}></Grid>
@@ -290,22 +247,10 @@ const EditPurchase: React.FC = () => {
                         {item.name}
                       </TableCell>
                       <TableCell align="left">
-                        <input
-                          className="purchase-order-input"
-                          defaultValue={item.itemQuantity}
-                          onChange={(
-                            e: React.ChangeEvent<HTMLInputElement>
-                          ) => handlePurchaseQuantityChange(item.name, e)}
-                        />
+                        {item.itemQuantity}
                       </TableCell>
                       <TableCell align="left">
-                        <input
-                          className="purchase-order-input"
-                          defaultValue={item.discount}
-                          onChange={(
-                            e: React.ChangeEvent<HTMLInputElement>
-                          ) => handlePurchaseDiscountChange(item.name, e)}
-                        />
+                        { item.discount}
                       </TableCell>
                       <TableCell align="left">
                         {item.selling_price}

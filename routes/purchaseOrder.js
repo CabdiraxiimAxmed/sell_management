@@ -84,7 +84,6 @@ router.get('/orders/:order_id', async (req, res) => {
 router.post('/order/update', async(req, res) => {
   let {id, supplier, purchase_date, purchase_status, items, total, paid, is_debt } = req.body;
   let formatItemArray = JSON.stringify(items[0]);
-  console.log(formatItemArray);
   try {
     await client.query(`UPDATE purchase_order set 
       supplier='${supplier}',
@@ -98,7 +97,6 @@ router.post('/order/update', async(req, res) => {
     `)
     res.send('success')
   } catch(err) {
-    console.log(err);
     res.send('error');
   }
 });
