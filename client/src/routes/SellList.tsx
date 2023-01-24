@@ -28,6 +28,7 @@ import Divider from '@mui/material/Divider';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
 
 type SellType = {
@@ -452,7 +453,9 @@ const SellMenuButton: React.FC<SellMenuButtonType> = ({ order_id, total, paid, i
         .catch(error => {
           toast.error(error.message);
         })
-    };
+    } else if (page === 'edit') {
+      navigate(`/sale/edit/${order_id}`)
+    }
     setAnchorEl(null);
   };
 
@@ -485,12 +488,16 @@ const SellMenuButton: React.FC<SellMenuButtonType> = ({ order_id, total, paid, i
       >
         <MenuItem onClick={() => handleClose('paid')} disableRipple disabled={isDisabled()}>
           <AttachMoneyIcon />
-          bixi lacag
+          pay
+        </MenuItem>
+        <MenuItem onClick={() => handleClose('edit')}>
+          <EditIcon />
+          Edit
         </MenuItem>
         <Divider sx={{ my: 0.5 }} />
         <MenuItem onClick={() => handleClose('delete')} disableRipple sx={{ color: 'red' }}>
           <DeleteIcon style={{ color: 'red' }} />
-          Tir
+          Delete
         </MenuItem>
       </StyledMenu>
     </div>

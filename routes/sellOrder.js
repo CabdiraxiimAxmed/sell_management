@@ -83,6 +83,26 @@ router.get('/sells', async (req, res) => {
   }
 });
 
+router.post('/order/update', async(req, res) => {
+  let { id, customer, sold_by, total, paid, discount, items } = req.body
+  let formatItemArray = JSON.stringify(items[0]);
+
+  try {
+    await client.query(`UPDATE sell_order set 
+      customer='${customer}',
+      sold_by='${sold_by}',
+      items=array['${formatItemArray}']::json[],
+      total='${total}',
+      paid='${paid}',
+      discount='${discount}'
+      WHERE order_id='${id}'
+    `)
+    res.send('success');
+  } catch(err) {
+    res.send('error').end();
+  }
+});
+
 router.post('/revenue', async (req, res) => {
   let { dateStr } = req.body;
   let daysNo = {

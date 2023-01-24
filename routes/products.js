@@ -52,7 +52,7 @@ router.get("/:name", async(req, res) => {
   }
 })
 
-router.get('/products-name', async (req, res) => {
+router.get('/products/name', async (req, res) => {
   try {
     let result = [];
     const resp = await client.query('SELECT name FROM products');
@@ -109,6 +109,18 @@ router.post('/item/quantity/update', async(req, res) => {
   try {
     for(let item of removedItems) {
       await client.query(`UPDATE products set units=units-'${item.quantity}' WHERE name='${item.name}'`);
+    }
+    res.send('success').end();
+  } catch(err) {
+    res.send('error').end();
+  }
+})
+
+router.post('/item/quantity/update/sell', async(req, res) => {
+  let { removedItems } = req.body;
+  try {
+    for(let item of removedItems) {
+      await client.query(`UPDATE products set units=units+'${item.quantity}' WHERE name='${item.name}'`);
     }
     res.send('success').end();
   } catch(err) {

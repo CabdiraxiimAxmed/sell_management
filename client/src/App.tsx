@@ -11,6 +11,7 @@ import PurchaseOrder from './routes/PurchaseOrder';
 import EditPurchase from './routes/EditPurchase';
 import PurchasePaper from './routes/PurchasePaper';
 import SellPaper from './routes/SellPaper';
+import EditSale from './routes/EditSaleOrder';
 import Inventory from './routes/Inventory';
 import AddProduct from './routes/AddProduct';
 import SellsList from './routes/SellList';
@@ -115,6 +116,10 @@ function App() {
             <Route
               path="/sells/:order_id"
               element={<Header children={<SellPaper />} />}
+            />
+            <Route
+              path="/sale/edit/:id"
+              element={<Header children={<EditSale />} />}
             />
             <Route path="/orders" element={<Header children={<Orders />} />} />
             <Route path="/sells" element={<Header children={<SellsList />} />} />

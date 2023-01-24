@@ -68,7 +68,7 @@ const Sell: React.FC = () => {
   };
 
   useEffect(() => {
-    axios.get('http://localhost:2312/products/products-name')
+    axios.get('http://localhost:2312/products/products/name')
       .then(res => {
         setProductNames(res.data);
       })
@@ -123,12 +123,12 @@ const Sell: React.FC = () => {
     axios.post('http://localhost:2312/sell/sell-order', { customer, is_debt: selected, products, discount, total, username: user.username, recordedDate })
       .then(res => {
         if (res.data == 'success') {
-          toast.success('waa lagu guuleystay');
+          toast.success('success');
           setTimeout(() => {
             navigate('/sells');
           }, 2000);
         } else if (res.data == 'error') {
-          toast.error('server: qalad ayaa dhacay');
+          toast.error('server error ');
         }
       }).catch(error => {
         toast.error(error.message);
