@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { TextField, Box, Button, Typography } from '@mui/material';
 
 const AddSupplier: React.FC = () => {
+  console.log('add supplier')
 
   const navigate = useNavigate();
 

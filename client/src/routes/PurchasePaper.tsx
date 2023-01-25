@@ -34,6 +34,7 @@ type SupplierType = {
 }
 
 const PurchasePaper: React.FC = () => {
+  console.log('purchase paper');
   const componentRef = useRef(null)
   const { order_id } = useParams();
   const [order, setOrder] = useState<OrderType[]>([

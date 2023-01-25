@@ -31,6 +31,7 @@ type Item = {
 }
 
 const EditPurchase: React.FC = () => {
+  console.log('edit purchase');
   const { id } = useParams();
   const navigate = useNavigate();
   const [removedItems, setRemovedItems] = useState<{name: string, quantity: number}[]>([]);

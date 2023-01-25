@@ -29,6 +29,7 @@ type ColumnDisplayType = {
   created_date: boolean,
 };
 const Customers: React.FC = () => {
+  console.log("customer page");
   const navigate = useNavigate();
   const componentRef = useRef(null);
   const [addCustomer, setAddCustomer] = useState<boolean>(false);

@@ -68,6 +68,7 @@ interface Columns {
 }
 
 const SellsList: React.FC = () => {
+  console.log('sells list');
   const navigate = useNavigate();
   const componentRef = useRef(null);
   const [page, setPage] = useState<number>(0);

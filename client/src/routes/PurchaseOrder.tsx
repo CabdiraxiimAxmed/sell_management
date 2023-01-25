@@ -35,6 +35,7 @@ type PurchasedItemType = {
   min_quantity_order: string;
 };
 const PurchaseOrder: React.FC = () => {
+  console.log('Purchase order');
   const navigate = useNavigate();
   const [wholeDiscount, setWholeDiscount] = useState<number>(0);
   const [productNameRef, setProductNameRef ] = useState<React.ChangeEvent<HTMLInputElement>>();

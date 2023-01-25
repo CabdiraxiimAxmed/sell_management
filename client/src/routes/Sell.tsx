@@ -29,6 +29,7 @@ type ItemType = {
 }
 
 const Sell: React.FC = () => {
+  console.log('sell.');
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.user.value);
   const [selected, setSelected] = useState<boolean>(false);

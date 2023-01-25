@@ -36,6 +36,7 @@ type SupplierDebtType = {
   recorded_date: string;
 };
 const Home: React.FC = () => {
+  console.log('home');
   const navigate = useNavigate();
   const month = moment().format("MMMM");
   let date = new Date();

@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { TextField, Box, Button, Typography } from '@mui/material';
 
 const AddUser: React.FC = () => {
+  console.log('add user');
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

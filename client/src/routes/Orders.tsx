@@ -58,7 +58,8 @@ interface Columns {
   format?: (value: number) => string;
 }
 
-const Supplier: React.FC = () => {
+const Order: React.FC = () => {
+  console.log('Order page');
   const navigate = useNavigate();
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
@@ -562,4 +563,4 @@ const StyledMenu = styled((props: MenuProps) => (
 }));
 
 export type { OrderType };
-export default Supplier;
+export default Order;

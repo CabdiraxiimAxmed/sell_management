@@ -29,6 +29,7 @@ type ColumnDisplayType = {
   contact: boolean;
 };
 const UserManagement: React.FC = () => {
+  console.log('user management');
   const componentRef = useRef(null);
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserType[]>([

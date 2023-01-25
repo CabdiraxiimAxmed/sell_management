@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const ProductInfo: React.FC = () => {
+  console.log('product info');
   const navigate = useNavigate();
   let [product, setProduct] = useState<{ [key: string]: ProductType }>({});
   let { name } = useParams();

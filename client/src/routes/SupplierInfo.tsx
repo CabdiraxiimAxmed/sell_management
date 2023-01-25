@@ -67,6 +67,7 @@ interface Columns {
 
 
 const SupplierInfo: React.FC = () => {
+  console.log('supplier info');
   const navigate = useNavigate();
   const itemBoughtRef = useRef(null);
   const debtRef = useRef(null);

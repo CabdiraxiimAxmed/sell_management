@@ -12,6 +12,7 @@ import {
 } from '@mui/icons-material';
 
 const UpdateUser: React.FC = () => {
+  console.log('update user');
   const navigate = useNavigate();
   const [userPermissions, setUserPermissions] = useState<{
     [key: string]: boolean;

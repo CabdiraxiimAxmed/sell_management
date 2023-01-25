@@ -11,6 +11,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 
 const AddProduct: React.FC = () => {
+  console.log('add product');
   let Category = [{ label: 'first' }, { label: 'second' }, { label: 'third' }];
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

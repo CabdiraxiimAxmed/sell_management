@@ -15,6 +15,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 
 export default function SignInSide() {
+  console.log('login');
   const [ cookie, setCookie] = useCookies<string>(['']);
   const dispatch = useDispatch();
   const navigate = useNavigate();

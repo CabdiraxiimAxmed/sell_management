@@ -29,7 +29,8 @@ type CustomerType = {
   created_date: string,
 }
 
-const PurchasePaper: React.FC = () => {
+const SalePaper: React.FC = () => {
+  console.log('sale paper');
   const componentRef = useRef(null)
   const { order_id } = useParams();
   const [sell, setSell] = useState<SellType[]>([
@@ -176,4 +177,4 @@ const PurchasePaper: React.FC = () => {
 };
 
 export type { SellType }
-export default PurchasePaper;
+export default SalePaper;

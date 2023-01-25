@@ -86,7 +86,8 @@ interface Columns {
   format?: (value: number) => string;
 }
 
-const SupplierInfo: React.FC = () => {
+const CustomerInfo: React.FC = () => {
+  console.log('customer info');
   const itemBoughtRef = useRef(null);
   const debtRef = useRef(null);
   const [editCustomer, setEditCustomer] = useState<boolean>(false);
@@ -498,4 +499,4 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 }
 
 
-export default SupplierInfo;
+export default CustomerInfo;

@@ -27,6 +27,7 @@ type ColumnDisplayType = {
   city: boolean;
 };
 const Supplier: React.FC = () => {
+  console.log('supplier');
   const componentRef = useRef(null);
   const navigate = useNavigate();
   const [suppliers, setSuppliers] = useState<SupplierType[]>([
