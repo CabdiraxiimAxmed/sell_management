@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
@@ -7,6 +8,7 @@ import { RootState } from '../app/store';
 import AccessibilityIcon from '@mui/icons-material/Accessibility';
 import SellIcon from '@mui/icons-material/Sell';
 import GroupIcon from '@mui/icons-material/Group';
+import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import FlagIcon from '@mui/icons-material/Flag';
 import ShopIcon from '@mui/icons-material/Shop';
@@ -32,6 +34,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import axios from 'axios';
 
 const drawerWidth = 190;
 
@@ -106,9 +109,12 @@ const Drawer = styled(MuiDrawer, {
 interface MiniProps {
   children: any;
 }
+
 const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
+  console.log('header.');
   const [cookie, setCookie] = useCookies<string>(['']);
   const navigate = useNavigate();
+  const [alertItemCount, setAlertItemCount] = useState<number>(0);
   const user = useSelector((state: RootState) => state.user.value);
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -116,6 +122,20 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
   const handleDrawerOpen = () => {
     setOpen(true);
   };
+
+  useEffect(() => {
+    axios.get('http://localhost:2312/products/alert/quantity')
+      .then(resp => {
+        if (resp.data === 'error') {
+          toast.error('server error');
+          return;
+        }
+        setAlertItemCount(resp.data.count);
+      })
+      .catch(error => {
+        toast.error(error.e);
+      })
+  }, [])
 
   const gotPermission = (page: string) => {
     if (user.role == 'admin') return true;
@@ -136,6 +156,18 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -160,6 +192,11 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
             onClick={logout}
             style={{ transform: 'translateX(45rem)' }}
             >logout</Button>
+          <div className='notification-container' style={{ transform: 'translateX(35rem)' }}>
+            <IconButton
+              onClick={ () => navigate('/products/alert')}
+            ><NotificationImportantIcon style={{ color: "white" }} /> <sup>{alertItemCount !== 0 && alertItemCount}</sup> </IconButton>
+          </div>
           <Typography
             variant="h6"
             noWrap

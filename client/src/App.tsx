@@ -14,6 +14,7 @@ import SellPaper from './routes/SellPaper';
 import EditSale from './routes/EditSaleOrder';
 import Inventory from './routes/Inventory';
 import AddProduct from './routes/AddProduct';
+import ItemAlert from './routes/ItemAlert';
 import SellsList from './routes/SellList';
 import Customer from './routes/Customer';
 import Header from './routes/Header';
@@ -87,6 +88,10 @@ function App() {
             <Route
               path="/products/add-product"
               element={<Header children={<AddProduct />} />}
+            />
+            <Route
+              path="/products/alert"
+              element={<Header children={<ItemAlert />} />}
             />
 
             <Route
