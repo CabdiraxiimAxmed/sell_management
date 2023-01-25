@@ -37,6 +37,7 @@ type PurchasedItemType = {
 const PurchaseOrder: React.FC = () => {
   const navigate = useNavigate();
   const [wholeDiscount, setWholeDiscount] = useState<number>(0);
+  const [productNameRef, setProductNameRef ] = useState<React.ChangeEvent<HTMLInputElement>>();
   const [quantity, setQuantity] = useState<{ [key: number]: number }>({});
   const [itemDiscount, setItemDiscount] = useState<{ [key: number]: number }>(
     {}
@@ -163,6 +164,7 @@ const PurchaseOrder: React.FC = () => {
       toast.error('write item name');
       return;
     }
+    productNameRef!.target.focus();
     axios
       .post('http://localhost:2312/products/item', { term: itemTerm })
       .then(resp => {
@@ -176,6 +178,7 @@ const PurchaseOrder: React.FC = () => {
       .catch(error => {
         toast.error(error.message);
       });
+    setItemTerm("");
   };
 
   const removeItem = (id: number, index: number) => {
@@ -211,6 +214,11 @@ const PurchaseOrder: React.FC = () => {
     }
     return total - wholeDiscount;
   };
+
+  const handleProductNameChange =  (e: React.ChangeEvent<HTMLInputElement>) => {
+    setItemTerm(e.target.value);
+    setProductNameRef(e);
+  }
 
   return (
     <Box component="form" noValidate onSubmit={handleSubmit}>
@@ -320,7 +328,9 @@ const PurchaseOrder: React.FC = () => {
               fullWidth
               required
               name="product-name"
-              onChange={e => setItemTerm(e.target.value)}
+              value={itemTerm}
+              multiline
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleProductNameChange(e)}
               label="product name"
               size="small"
             />
