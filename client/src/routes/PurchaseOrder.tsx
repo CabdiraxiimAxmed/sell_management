@@ -123,7 +123,7 @@ const PurchaseOrder: React.FC = () => {
           }, 2000);
         } else if (resp.data === 'error') {
           toast.error('server error');
-        }
+        } 
       })
       .catch(error => {
         toast.error(error.message);

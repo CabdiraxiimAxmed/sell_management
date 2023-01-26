@@ -147,6 +147,13 @@ router.post('/revenue', async (req, res) => {
 router.post('/sell-order', async (req, res) => {
   let { customer, is_debt, products, discount, total, username, recordedDate } = req.body;
   const order_id = orderid.generate();
+
+  for(let item of products) {
+    let insufficientItems = await client.query(`SELECT * FROM products WHERE units < '${item.quantity}'`);
+    if(insufficientItems.rows.length > 0) {
+      return res.send({ item: insufficientItems.rows[0].name, message: 'not_enough' });
+    } 
+  }
   let formatItemArray = JSON.stringify(products);
   let paid;
   try {

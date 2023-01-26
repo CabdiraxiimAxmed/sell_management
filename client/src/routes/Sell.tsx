@@ -113,7 +113,7 @@ const Sell: React.FC = () => {
       }
       let foundItem: any = items.find(item => item.name === data.get(`item${i}`));
       if (parseFloat(foundItem.units) < itemQuantity) {
-        toast.warn(`${foundItem.name} is not enough`);
+        toast.warn(`${foundItem.name} not in the store!!!`);
         return;
       }
       let item = { "item": data.get(`item${i}`), "quantity": itemQuantity, "price": valueHolders[`price${i}`], amount }
@@ -130,6 +130,8 @@ const Sell: React.FC = () => {
           }, 2000);
         } else if (res.data == 'error') {
           toast.error('server error ');
+        } else if (res.data.message === 'not_enough') {
+          toast.warn(`${res.data.item} not in the store!!!`);
         }
       }).catch(error => {
         toast.error(error.message);

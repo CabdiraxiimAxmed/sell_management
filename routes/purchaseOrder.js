@@ -157,7 +157,6 @@ router.post('/purchase-order', async (req, res) => {
     wholeDiscount,
     total,
   } = req.body;
-  
   let formatItemArray = JSON.stringify(items);
   try {
     if (purchase_status === 'received') {
