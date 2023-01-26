@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { useCookies } from 'react-cookie';
 import Login from './routes/login';
 import Home from './routes/home';
+import PageNotFound from './routes/PageNotFound';
 import Supplier from './routes/Supplier';
 import Orders from './routes/Orders';
 import PurchaseOrder from './routes/PurchaseOrder';
@@ -139,6 +140,7 @@ function App() {
               element={<Header children={<UpdateUser />} />}
             />
           </Route>
+          <Route path="*" element={ <PageNotFound /> } />
         </Routes>
       </Router>
 
