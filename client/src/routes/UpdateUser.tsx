@@ -5,11 +5,6 @@ import { TextField, Box, Button, Typography } from '@mui/material';
 import { UserType } from './UserManagement';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import {
-  ConstructionOutlined,
-  TroubleshootRounded,
-  TurnedIn,
-} from '@mui/icons-material';
 
 const UpdateUser: React.FC = () => {
   console.log('update user');
@@ -80,21 +75,21 @@ const UpdateUser: React.FC = () => {
     } else {
       permissions.push({ 'user-management': false });
     }
-    // if (supplier == 'on') {
-    //   permissions.push({ supplier: true });
-    // } else {
-    //   permissions.push({ supplier: false });
-    // }
-    // if (purchaseOrder == 'on') {
-    //   permissions.push({ 'purchase-order': true });
-    // } else {
-    //   permissions.push({ 'purchase-order': false });
-    // }
-    // if (orders == 'on') {
-    //   permissions.push({ orders: true });
-    // } else {
-    //   permissions.push({ orders: false });
-    // }
+    if (supplier == 'on') {
+      permissions.push({ supplier: true });
+    } else {
+      permissions.push({ supplier: false });
+    }
+    if (purchaseOrder == 'on') {
+      permissions.push({ 'purchase-order': true });
+    } else {
+      permissions.push({ 'purchase-order': false });
+    }
+    if (orders == 'on') {
+      permissions.push({ orders: true });
+    } else {
+      permissions.push({ orders: false });
+    }
     if (!name || !username || !password || !contact || !role) {
       toast.warn('fadlan buuxi');
       return;
@@ -215,7 +210,29 @@ const UpdateUser: React.FC = () => {
                 checked={isChecked('user-management')}
                 onChange={() => handleChange('user-management')}
               />
-              <span>cinwaanada</span>
+              <span>User management</span>
+            </label>
+          </div>
+          <div className="permissions-button">
+            <label className="switch">
+              <input
+                type="checkbox"
+                name="user-management"
+                checked={isChecked('user-management')}
+                onChange={() => handleChange('user-management')}
+              />
+              <span>Purchase Oder</span>
+            </label>
+          </div>
+          <div className="permissions-button">
+            <label className="switch">
+              <input
+                type="checkbox"
+                name="user-management"
+                checked={isChecked('user-management')}
+                onChange={() => handleChange('user-management')}
+              />
+              <span>Sale Oder</span>
             </label>
           </div>
         </div>

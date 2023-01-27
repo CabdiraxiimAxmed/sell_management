@@ -17,7 +17,9 @@ const ProtectedRoutes: React.FC<Props> = ({ page }) => {
   const isAuth = () => {
     if (cookie.login) {
       console.log('authentication');
+      if(user.role === 'admin') return 'authenticated';
       for(let permission of user.permissions[0]){
+        console.log(permission);
         if (!permission[page]){
           return 'permission_denied';
         }

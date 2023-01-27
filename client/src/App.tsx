@@ -156,7 +156,7 @@ function App() {
               element={<Header children={<EditSale />} />}
             />
           </Route>
-          <Route element={<ProtectedRoute page='purchase-order' />}>
+          <Route element={<ProtectedRoute page='order' />}>
             <Route path="/orders" element={<Header children={<Orders />} />} />
           </Route>
           <Route element={<ProtectedRoute page='sales' />}>
