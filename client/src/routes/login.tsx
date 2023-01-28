@@ -32,13 +32,13 @@ export default function SignInSide() {
       .post('api/user/login', { username, password })
       .then(res => {
         if (res.data == 'not_found') {
-          toast.error('xisaabkan ma abuurno!!');
+          toast.error("Account doesn't exist!!");
           return;
         } else if (res.data == 'not_match') {
-          toast.error('passwordka ma saxna!!');
+          toast.error('Incorrect password!!');
           return;
         } else if (res.data == 'err') {
-          toast.error('qalad ayaa dhacay');
+          toast.error('Server error');
           return;
         }
         dispatch(setUser(res.data));
@@ -46,7 +46,7 @@ export default function SignInSide() {
            path: '/',
            maxAge: 86400,
         })
-        navigate('/products');
+        navigate('/user-management');
       })
       .catch(err => {
         toast.error(err.message);

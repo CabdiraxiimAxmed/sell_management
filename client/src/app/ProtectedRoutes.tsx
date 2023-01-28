@@ -15,16 +15,14 @@ const ProtectedRoutes: React.FC<Props> = ({ page }) => {
   const user = useSelector((state: RootState) => state.user.value);
   const location = useLocation();
   const isAuth = () => {
-    if (cookie.login) {
-      console.log('authentication');
+    if (user.name) {
       if(user.role === 'admin') return 'authenticated';
       for(let permission of user.permissions[0]){
-        console.log(permission);
-        if (!permission[page]){
-          return 'permission_denied';
-        }
+        if (permission[page]){
+          return 'authenticated';
+        } 
+        return 'permission_denied';
       }
-      return 'authenticated';
     } 
     return false;
   };
@@ -36,9 +34,5 @@ const ProtectedRoutes: React.FC<Props> = ({ page }) => {
     return <Navigate to="/galid" state={{ from: location }} />;
   }
 };
-// return isAuth() ? (
-//   <Outlet />
-// ) : (
-//     <Navigate to="/galid" state={{ from: location }} />
-//   );
+
 export default ProtectedRoutes;

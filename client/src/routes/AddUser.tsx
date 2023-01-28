@@ -5,37 +5,54 @@ import { UserType } from './UserManagement';
 import { ToastContainer, toast } from 'react-toastify';
 import { TextField, Box, Button, Typography } from '@mui/material';
 
+let permission_pages: string[] = [
+  "user-management",
+  "supplier",
+  "products",
+  "add-product",
+  "product",
+  "product-alert",
+  "customer",
+  "customer-info",
+  "supplier-info",
+  "purchase-order",
+  "purchase-edit",
+  "purchase-paper",
+  "sale-paper",
+  "edit-sale",
+  "order",
+  "sales",
+  "sale",
+  "add-user",
+  "add-supplier",
+  "update-user",
+]
+
 const AddUser: React.FC = () => {
   console.log('add user');
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let permissions = [];
+    let permissions: {[key: string]: boolean}[] = [];
     const data = new FormData(e.currentTarget);
     let name = data.get('name');
     let username = data.get('username');
     let role = data.get('role');
     let password = data.get('password');
     let contact = data.get('contact');
-    let userManagement = data.get('user-management');
-    let supplier = data.get('supplier');
-    let purchaseOrder = data.get('purchase-order');
-    let orders = data.get('orders');
-    if (userManagement == 'on') {
-      permissions.push({ 'user-management': true });
-    } else {
-      permissions.push({ 'user-management': false });
+
+    for(let page of permission_pages) {
+      let make_it_object: {[key: string]: boolean} = {};
+      if(data.get(page) === 'on'){
+        make_it_object[page] = true;
+        permissions.push(make_it_object);
+      } else {
+        make_it_object[page] = false;
+        permissions.push(make_it_object);
+      } 
     }
-    if (supplier == 'on') {
-      permissions.push('supplier');
-    }
-    if (purchaseOrder == 'on') {
-      permissions.push('purchase-order');
-    }
-    if (orders == 'on') {
-      permissions.push('orders');
-    }
+
     if (!name || !username || !password || !contact || !role) {
       toast.warn('fadlan buuxi');
       return;
@@ -117,11 +134,15 @@ const AddUser: React.FC = () => {
         <div></div>
         <div className="role-permissions">
           <Typography variant="h5">Ogolaanshaha</Typography>
-          <div className="permissions-button">
-            <label className="switch">
-              <input type="checkbox" name="user-management" />
-              <span>cinwaanada</span>
-            </label>
+          <div className='inner-container'>
+            {permission_pages.map((permission: string, index: number) => (
+              <div key={index} className="permissions-button">
+                <label className="switch">
+                  <input type="checkbox" name={permission} />
+                  <span>{permission} page</span>
+                </label>
+              </div>
+            ))}
           </div>
         </div>
         <div></div>

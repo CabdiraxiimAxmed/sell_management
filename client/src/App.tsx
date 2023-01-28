@@ -144,7 +144,7 @@ function App() {
               element={<Header children={<PurchasePaper />} />}
             />
           </Route>
-          <Route element={<ProtectedRoute page='sell-paper' />}>
+          <Route element={<ProtectedRoute page='sale-paper' />}>
             <Route
               path="/sells/:order_id"
               element={<Header children={<SellPaper />} />}

@@ -140,7 +140,10 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
   const gotPermission = (page: string) => {
     if (user.role == 'admin') return true;
     for (let permission of user.permissions[0]) {
-      return permission[page];
+    }
+    let find_permission = user.permissions[0].filter(permission => Object.keys(permission)[0] === page);
+    if(find_permission.length) {
+      return find_permission[0][page];
     }
     return false;
   };

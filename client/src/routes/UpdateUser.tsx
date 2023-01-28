@@ -6,6 +6,29 @@ import { UserType } from './UserManagement';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
+let permission_pages: string[] = [
+  "user-management",
+  "supplier",
+  "products",
+  "add-product",
+  "product",
+  "product-alert",
+  "customer",
+  "customer-info",
+  "supplier-info",
+  "purchase-order",
+  "purchase-edit",
+  "purchase-paper",
+  "sale-paper",
+  "edit-sale",
+  "order",
+  "sales",
+  "sale",
+  "add-user",
+  "add-supplier",
+  "update-user",
+]
+
 const UpdateUser: React.FC = () => {
   console.log('update user');
   const navigate = useNavigate();
@@ -28,17 +51,18 @@ const UpdateUser: React.FC = () => {
     axios
       .get(`http://localhost:2312/user/${username}`)
       .then(res => {
+        if(res.data.permissions) {
+          for (let permission of res.data.permissions[0]) {
+            setUserPermissions(prevState => {
+              return { ...prevState, ...permission }
+            });
+          }
+        }
         setUser(res.data);
       })
       .catch(error => {
         toast.error(error.message);
       });
-    for (let permission of user.permissions[0]) {
-      setUserPermissions({
-        ...userPermissions,
-        ...permission,
-      });
-    }
   }, []);
 
   const deleteUser = () => {
@@ -59,36 +83,22 @@ const UpdateUser: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let permissions = [];
+    let permissions: {[key: string]: boolean}[] = [];
     const data = new FormData(e.currentTarget);
     let name = data.get('name');
     let username = data.get('username');
     let role = data.get('role');
     let password = data.get('password');
     let contact = data.get('contact');
-    let userManagement = data.get('user-management');
-    let supplier = data.get('supplier');
-    let purchaseOrder = data.get('purchase-order');
-    let orders = data.get('orders');
-    if (userManagement == 'on') {
-      permissions.push({ 'user-management': true });
-    } else {
-      permissions.push({ 'user-management': false });
-    }
-    if (supplier == 'on') {
-      permissions.push({ supplier: true });
-    } else {
-      permissions.push({ supplier: false });
-    }
-    if (purchaseOrder == 'on') {
-      permissions.push({ 'purchase-order': true });
-    } else {
-      permissions.push({ 'purchase-order': false });
-    }
-    if (orders == 'on') {
-      permissions.push({ orders: true });
-    } else {
-      permissions.push({ orders: false });
+    for(let page of permission_pages) {
+      let make_it_object: {[key: string]: boolean} = {};
+      if(data.get(page) === 'on'){
+        make_it_object[page] = true;
+        permissions.push(make_it_object);
+      } else {
+        make_it_object[page] = false;
+        permissions.push(make_it_object);
+      } 
     }
     if (!name || !username || !password || !contact || !role) {
       toast.warn('fadlan buuxi');
@@ -201,39 +211,21 @@ const UpdateUser: React.FC = () => {
         />
         <div></div>
         <div className="role-permissions">
-          <Typography variant="h5">Ogolaanshaha</Typography>
-          <div className="permissions-button">
-            <label className="switch">
-              <input
-                type="checkbox"
-                name="user-management"
-                checked={isChecked('user-management')}
-                onChange={() => handleChange('user-management')}
-              />
-              <span>User management</span>
-            </label>
-          </div>
-          <div className="permissions-button">
-            <label className="switch">
-              <input
-                type="checkbox"
-                name="user-management"
-                checked={isChecked('user-management')}
-                onChange={() => handleChange('user-management')}
-              />
-              <span>Purchase Oder</span>
-            </label>
-          </div>
-          <div className="permissions-button">
-            <label className="switch">
-              <input
-                type="checkbox"
-                name="user-management"
-                checked={isChecked('user-management')}
-                onChange={() => handleChange('user-management')}
-              />
-              <span>Sale Oder</span>
-            </label>
+          <Typography variant="h5">Permissions</Typography>
+          <div className='inner-container'>
+            {permission_pages.map((permission: string, index: number) => (
+              <div key={index} className="permissions-button">
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    name={permission}
+                    checked={isChecked(permission)}
+                    onChange={() => handleChange(permission)}
+                  />
+                  <span>{permission} page</span>
+                </label>
+              </div>
+            ))}
           </div>
         </div>
         <div></div>

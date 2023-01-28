@@ -119,7 +119,7 @@ body {
 /* design add-user */
 .add-user-container {
   width: 53rem;
-  height: 30rem;
+  height: 45rem;
   background-color: white;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 10px;
@@ -286,6 +286,16 @@ body {
 .permission-denied-container h1, h6 {
   color: red;
 }
+/* update user file */
+.role-permissions .inner-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.role-permissions .inner-container .switch {
+  width: 200px;
+}
+
+
 
 .inactive {
   display: none !important;
