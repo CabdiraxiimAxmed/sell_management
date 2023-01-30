@@ -295,6 +295,13 @@ body {
   width: 200px;
 }
 
+/* Report file */
+.chart-container {
+  width: 35rem;
+  height: 30rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
 
 
 .inactive {

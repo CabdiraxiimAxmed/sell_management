@@ -8,6 +8,7 @@ import { RootState } from '../app/store';
 import AccessibilityIcon from '@mui/icons-material/Accessibility';
 import SellIcon from '@mui/icons-material/Sell';
 import GroupIcon from '@mui/icons-material/Group';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import FlagIcon from '@mui/icons-material/Flag';
@@ -480,6 +481,32 @@ const MiniDrawer: React.FC<MiniProps> = ({ children }) => {
               }}
             >
               <FlagIcon color="secondary" />
+            </ListItemIcon>
+            <ListItemText primary={'home'} sx={{ opacity: open ? 1 : 0 }} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem
+          disablePadding
+          sx={{ display: 'block' }}
+          component={Link}
+          to="/report"
+          className={gotPermission('report') ? '' : 'inactive'}
+        >
+          <ListItemButton
+            sx={{
+              minHeight: 48,
+              justifyContent: open ? 'initial' : 'center',
+              px: 2.5,
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: open ? 3 : 'auto',
+                justifyContent: 'center',
+              }}
+            >
+              <AnalyticsIcon color="secondary" />
             </ListItemIcon>
             <ListItemText primary={'report'} sx={{ opacity: open ? 1 : 0 }} />
           </ListItemButton>

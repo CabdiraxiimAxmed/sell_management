@@ -4,6 +4,7 @@ import { setUser } from './features/user';
 import { ToastContainer, toast } from 'react-toastify';
 import { useCookies } from 'react-cookie';
 import Login from './routes/login';
+import Report from './routes/Report';
 import Home from './routes/home';
 import PageNotFound from './routes/PageNotFound';
 import PermissionDenied from './routes/PermissionDenied';
@@ -76,6 +77,12 @@ function App() {
             <Route
               path="/user-management"
               element={<Header children={<UserManagement />} />}
+            />
+          </Route>
+          <Route element={<ProtectedRoute page='report' />}>
+            <Route
+              path="/report"
+              element={<Header children={<Report />} />}
             />
           </Route>
           <Route element={<ProtectedRoute page='supplier' />}>

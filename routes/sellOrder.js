@@ -83,7 +83,7 @@ router.get('/sells', async (req, res) => {
   }
 });
 
-router.post('/order/update', async(req, res) => {
+router.post('/order/update', async (req, res) => {
   let { id, customer, sold_by, total, paid, discount, items } = req.body
   let formatItemArray = JSON.stringify(items[0]);
 
@@ -98,40 +98,46 @@ router.post('/order/update', async(req, res) => {
       WHERE order_id='${id}'
     `)
     res.send('success');
-  } catch(err) {
+  } catch (err) {
     res.send('error').end();
   }
 });
 
 router.post('/revenue', async (req, res) => {
   let { dateStr } = req.body;
+
   let daysNo = {
-    January: 31,
-    Febuary: 29,
-    March: 31,
-    April: 30,
-    May: 31,
-    June: 30,
-    July: 31,
-    August: 31,
-    September: 30,
-    October: 31,
-    November: 30,
-    December: 31,
+    '01': 31,
+    '02': 29,
+    '03': 31,
+    '04': 30,
+    '05': 31,
+    '06': 30,
+    '07': 31,
+    '08': 31,
+    '09': 30,
+    '10': 31,
+    '11': 30,
+    '12': 31,
   };
+  //
+
 
   try {
-    let splitted = dateStr.split(/(\s+)/).filter(function(e) { return e.trim().length > 0; });
+    let splitted = dateStr.split(/(\s+)/).filter(function(e) {
+      return e.trim().length > 0;
+    });
     if (splitted.length < 2 || splitted.length > 2) {
       res.send('correct');
       return;
-    };
+    }
+
     const days = daysNo[splitted[0]];
     let result = [];
     for (let i = 1; i <= days; i++) {
-      let day = dateOrdinal(i);
-      let date = `${splitted[0]} ${day} ${splitted[1]}`;
-      const resp = await client.query(`SELECT order_id, paid, total, created_date FROM sell_order WHERE created_date LIKE '%${date}%'`);
+      let day = i < 10 ? `0${i}` : i;
+      let date = `${splitted[1]}-${splitted[0]}-${day}`;
+      const resp = await client.query(`SELECT order_id, paid, total, created_date FROM sell_order WHERE created_date='${date}'`);
       if (resp.rows.length === 0) continue;
       result.push(...resp.rows);
     }
@@ -140,26 +146,28 @@ router.post('/revenue', async (req, res) => {
     }
     res.send(result);
   } catch (err) {
+    console.log(err);
     res.send('error');
   }
 });
 
+
 router.post('/sell-order', async (req, res) => {
-  let { customer, is_debt, products, discount, total, username, recordedDate } = req.body;
+  let { customer, is_debt, products, discount, total, username } = req.body;
   const order_id = orderid.generate();
 
-  for(let item of products) {
+  for (let item of products) {
     let insufficientItems = await client.query(`SELECT * FROM products WHERE units < '${item.quantity}'`);
-    if(insufficientItems.rows.length > 0) {
+    if (insufficientItems.rows.length > 0) {
       return res.send({ item: insufficientItems.rows[0].name, message: 'not_enough' });
-    } 
+    }
   }
   let formatItemArray = JSON.stringify(products);
   let paid;
   try {
     if (customer === 'deg-deg' || !is_debt) {
       paid = total;
-      await client.query(`INSERT INTO sell_order (order_id, customer, sold_by, is_debt, items, discount, total, paid, created_date) VALUES('${order_id}', '${customer}', '${username}', '${is_debt}', array['${formatItemArray}']::json[], '${discount}', '${total}', '${paid}', '${recordedDate}')`);
+      await client.query(`INSERT INTO sell_order (order_id, customer, sold_by, is_debt, items, discount, total, paid) VALUES('${order_id}', '${customer}', '${username}', '${is_debt}', array['${formatItemArray}']::json[], '${discount}', '${total}', '${paid}')`);
     } else if (is_debt) {
       paid = 0;
       await client.query(`INSERT INTO sell_order (order_id, customer, sold_by, is_debt, items, discount, total, paid, created_date) VALUES('${order_id}', '${customer}', '${username}', '${is_debt}', array['${formatItemArray}']::json[], '${discount}', '${total}', '${paid}', '${recordedDate}')`);
@@ -194,5 +202,142 @@ function dateOrdinal(dom) {
   else if (dom == 23 || dom == 3) return dom + "rd";
   else return dom + "th";
 };
+
+// For dashboard.
+router.post('/units/report', async (req, res) => {
+  /* number of units sold, revenue, items sold, debt was give. */
+  const { date } = req.body;
+  let units = 0;
+  let revenue = 0;
+  try {
+    let items;
+    if (!date) {
+      items = await client.query('SELECT * from sell_order WHERE created_date = CURRENT_DATE');
+    } else {
+      items = await client.query(`SELECT * from sell_order WHERE created_date = '${date}'`);
+    }
+    if (items.rows.length === 0) {
+      units = 0;
+    } else {
+      // suming all the units.
+      for (let order of items.rows) {
+        for (let item of order.items[0]) {
+          units += item.quantity;
+        };
+      }
+
+      // suming all the total of orders.
+      for (let order of items.rows) {
+        revenue = Math.round((revenue + parseFloat(order.total)) * 100) / 100;
+      }
+    }
+    res.send({ units, revenue }).end();
+  } catch (err) {
+    console.log(err);
+    res.send('error');
+  }
+});
+
+router.post('/monthly/units_sold', async (req, res) => {
+  let { dateStr } = req.body
+
+  console.log({ dateStr });
+
+  let daysNo = {
+    '01': 31,
+    '02': 29,
+    '03': 31,
+    '04': 30,
+    '05': 31,
+    '06': 30,
+    '07': 31,
+    '08': 31,
+    '09': 30,
+    '10': 31,
+    '11': 30,
+    '12': 31,
+  };
+
+  try {
+    let splitted = dateStr.split(/(\s+)/).filter(function(e) {
+      return e.trim().length > 0;
+    });
+    const days = daysNo[splitted[0]];
+    let result = [];
+    let labels = [];
+    for (let i = 1; i <= days; i++) {
+
+      let day = i < 10 ? `0${i}` : i;
+      let date = `${splitted[1]}-${splitted[0]}-${day}`;
+      const resp = await client.query(`SELECT items FROM sell_order WHERE created_date='${date}'`);
+      labels.push(date);
+      if (resp.rows.length === 0) {
+        result.push(0);
+        continue;
+      }
+      let units = 0;
+      for (let items of resp.rows) {
+        for (let item of items.items[0]) {
+          units = Math.round((units + item.quantity) * 100) / 100
+
+        }
+      }
+      result.push(units);
+    }
+    res.send({ labels, datasets: [{ label: 'number items sold', data: result, backgroundColor: 'rgba(53, 162, 235, 0.5)' }] });
+  } catch (error) {
+    console.log(error);
+    res.send('error');
+  }
+});
+
+router.post('/monthly/revenue', async (req, res) => {
+
+  let { dateStr } = req.body
+
+  let daysNo = {
+    '01': 31,
+    '02': 29,
+    '03': 31,
+    '04': 30,
+    '05': 31,
+    '06': 30,
+    '07': 31,
+    '08': 31,
+    '09': 30,
+    '10': 31,
+    '11': 30,
+    '12': 31,
+  };
+
+  try {
+    let splitted = dateStr.split(/(\s+)/).filter(function(e) {
+      return e.trim().length > 0;
+    });
+    const days = daysNo[splitted[0]];
+    let result = [];
+    let labels = [];
+    for (let i = 1; i <= days; i++) {
+
+      let day = i < 10 ? `0${i}` : i;
+      let date = `${splitted[1]}-${splitted[0]}-${day}`;
+      const resp = await client.query(`SELECT * FROM sell_order WHERE created_date='${date}' AND total = paid`);
+      labels.push(date);
+      if (resp.rows.length === 0) {
+        result.push(0);
+        continue;
+      }
+      let total = 0;
+      for(let order of resp.rows) {
+        total = Math.round((total + parseFloat(order.total)) * 100) / 100;
+      }
+      result.push(total);
+    }
+    res.send({ labels, datasets: [{ label: 'Revenue', data: result, backgroundColor: 'rgba(53, 162, 235, 0.5)' }] });
+  } catch (error) {
+    console.log(error);
+    res.send('error');
+  }
+});
 
 module.exports = router;
