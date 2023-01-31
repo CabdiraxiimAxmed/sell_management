@@ -146,6 +146,8 @@ router.post('/expense', async (req, res) => {
   }
 });
 
+
+
 router.post('/purchase-order', async (req, res) => {
   let {
     supplier,
@@ -336,6 +338,106 @@ router.post('/get-debt-supplier', async (req, res) => {
   } catch (err) {
     res.send('error');
   }
+});
+
+
+/*
+* NOTE this routes returns all monthly expense for the chart to display it.
+*/
+router.post('/monthly/expense', async(req, res) => {
+  const { dateStr } = req.body;
+  let daysNo = {
+    '01': 31,
+    '02': 29,
+    '03': 31,
+    '04': 30,
+    '05': 31,
+    '06': 30,
+    '07': 31,
+    '08': 31,
+    '09': 30,
+    '10': 31,
+    '11': 30,
+    '12': 31,
+  };
+
+  try {
+    let splitted = dateStr.split(/(\s+)/).filter(function(e) {
+      return e.trim().length > 0;
+    });
+    if (splitted.length < 2 || splitted.length > 2) {
+      res.send('correct');
+      return;
+    }
+    const days = daysNo[splitted[0]];
+    let result = [];
+    let labels = [];
+    for (let i = 1; i <= days; i++) {
+      let day = i < 10 ? `0${i}` : i;
+      let date = `${splitted[1]}-${splitted[0]}-${day}`;
+      labels.push(date);
+      const resp = await client.query(`SELECT * FROM purchase_order WHERE purchase_date='${date}' AND total = paid`);
+      if (resp.rows.length === 0) {
+        result.push(0);
+        continue
+      };
+      let total = 0;
+      for(let order of resp.rows) {
+        total = Math.round((total + parseFloat(order.total)) * 100) / 100;
+      }
+      result.push(total);
+    }
+    res.send({ labels, datasets: [{ label: 'Expense', data: result, backgroundColor: 'rgba(53, 162, 235, 0.5)' }] });
+  } catch(err) {
+    res.send('error');
+  };
+});
+
+router.post('/monthly/report', async(req, res) => {
+  const { dateStr } = req.body;
+  let daysNo = {
+    '01': 31,
+    '02': 29,
+    '03': 31,
+    '04': 30,
+    '05': 31,
+    '06': 30,
+    '07': 31,
+    '08': 31,
+    '09': 30,
+    '10': 31,
+    '11': 30,
+    '12': 31,
+  };
+
+  try {
+    let splitted = dateStr.split(/(\s+)/).filter(function(e) {
+      return e.trim().length > 0;
+    });
+    if (splitted.length < 2 || splitted.length > 2) {
+      res.send('correct');
+      return;
+    }
+    const days = daysNo[splitted[0]];
+    let units = 0;
+    let expense = 0;
+    for (let i = 1; i <= days; i++) {
+      let day = i < 10 ? `0${i}` : i;
+      let date = `${splitted[1]}-${splitted[0]}-${day}`;
+      let resp = await client.query(`SELECT * FROM purchase_order WHERE purchase_date = '${date}' AND purchase_status = 'received'`)
+      if(resp.rows.length === 0) continue;
+      for(let order of resp.rows) {
+        let paid = order.paid ? order.paid : 0;
+        expense = Math.round((expense + parseFloat(paid))* 100) / 100;
+        for(let item of order.items[0]) {
+          units += item.itemQuantity;
+        }
+      }
+    }
+    res.send({ units, expense }).end();
+  } catch(err) {
+    res.send('error').end();
+  };
 });
 
 module.exports = router;

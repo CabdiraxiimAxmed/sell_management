@@ -146,7 +146,6 @@ router.post('/revenue', async (req, res) => {
     }
     res.send(result);
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
@@ -203,9 +202,9 @@ function dateOrdinal(dom) {
   else return dom + "th";
 };
 
-// For dashboard.
+/* This routes is the number of units sold and number of revenue. */
 router.post('/units/report', async (req, res) => {
-  /* number of units sold, revenue, items sold, debt was give. */
+  /* Change the date */
   const { date } = req.body;
   let units = 0;
   let revenue = 0;
@@ -226,22 +225,19 @@ router.post('/units/report', async (req, res) => {
         };
       }
 
-      // suming all the total of orders.
+      // suming all the total of sale orders.
       for (let order of items.rows) {
         revenue = Math.round((revenue + parseFloat(order.total)) * 100) / 100;
       }
     }
     res.send({ units, revenue }).end();
   } catch (err) {
-    console.log(err);
     res.send('error');
   }
 });
 
 router.post('/monthly/units_sold', async (req, res) => {
   let { dateStr } = req.body
-
-  console.log({ dateStr });
 
   let daysNo = {
     '01': 31,
@@ -286,7 +282,6 @@ router.post('/monthly/units_sold', async (req, res) => {
     }
     res.send({ labels, datasets: [{ label: 'number items sold', data: result, backgroundColor: 'rgba(53, 162, 235, 0.5)' }] });
   } catch (error) {
-    console.log(error);
     res.send('error');
   }
 });
@@ -335,7 +330,6 @@ router.post('/monthly/revenue', async (req, res) => {
     }
     res.send({ labels, datasets: [{ label: 'Revenue', data: result, backgroundColor: 'rgba(53, 162, 235, 0.5)' }] });
   } catch (error) {
-    console.log(error);
     res.send('error');
   }
 });

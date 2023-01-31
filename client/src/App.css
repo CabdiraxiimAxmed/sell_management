@@ -283,7 +283,7 @@ body {
   flex-direction: column;
   font-weight: bold;
 }
-.permission-denied-container h1, h6 {
+.permission-denied-container h1, .permission-denied-container h6 {
   color: red;
 }
 /* update user file */
