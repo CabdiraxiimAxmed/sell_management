@@ -104,8 +104,12 @@ const EditPurchase: React.FC = () => {
     let poppedItem: any = items.filter((item: Item) => item.name === name);
     //setSendData({ name: removedItem[0].name, quantity: removedItem[0].itemQuantity, status: 'subtr' });
     setRemovedItems([...removedItems, { name: poppedItem[0].name, quantity: poppedItem[0].itemQuantity }]);
-    let paid: number  = parseFloat(order.paid) - parseFloat(poppedItem[0].selling_price);
-    setOrder({ ...order, ['items']: [finalItems], paid })
+    let paid: number  = 0;
+    if(parseFloat(order.paid) > 0) {
+      paid= Math.round((parseFloat(order.paid) - parseFloat(poppedItem[0].selling_price)) * 100) / 100;
+    }
+    let total: number  = Math.round((parseFloat(order.total) - parseFloat(poppedItem[0].selling_price)) * 100) / 100;
+    setOrder({ ...order, ['items']: [finalItems], paid, total })
   };
 
   return (
@@ -172,7 +176,7 @@ const EditPurchase: React.FC = () => {
               fullWidth
               required
               name="total"
-              defaultValue={`${order.total}`}
+              value={`${order.total}`}
               multiline
               size="small"
             />

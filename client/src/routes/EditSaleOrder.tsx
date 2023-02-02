@@ -96,8 +96,13 @@ const EditSale: React.FC = () => {
     if (items.length === 1) return;
     let finalItems: any = items.filter((item: Item) => item.item !== name);
     let poppedItem: any = items.filter((item: Item) => item.item === name);
+    let paid: number = 0;
+    if (parseFloat(order.paid) > 0) {
+      paid = Math.round((parseFloat(order.paid) - parseFloat(poppedItem[0].amount)) * 100) / 100;
+    }
+    let total: number = Math.round((parseFloat(order.total) - parseFloat(poppedItem[0].amount)) * 100) / 100;
     setRemovedItems([...removedItems, { name: poppedItem[0].item, quantity: poppedItem[0].quantity }]);
-    setOrder({ ...order, ['items']: [finalItems] })
+    setOrder({ ...order, ['items']: [finalItems], paid, total })
   };
   
 
@@ -152,7 +157,7 @@ const EditSale: React.FC = () => {
               fullWidth
               required
               name="total"
-              defaultValue={`${order.total}`}
+              value={`${order.total}`}
               multiline
               size="small"
             />
@@ -178,7 +183,7 @@ const EditSale: React.FC = () => {
               fullWidth
               required
               name="paid"
-              defaultValue={`${order.paid ? order.paid : 0}`}
+              value={`${order.paid ? order.paid : 0}`}
               multiline
               size="small"
             />
