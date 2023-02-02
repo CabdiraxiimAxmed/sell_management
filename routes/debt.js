@@ -6,7 +6,7 @@ router.post('/sells/date', async(req, res) => {
   let { dateStr } = req.body;
   let daysNo = {
     January: 31,
-    Febuary: 29,
+    February: 29,
     March: 31,
     April: 30,
     May: 31,
@@ -48,7 +48,7 @@ router.post('/purchase/date', async(req, res) => {
   let { dateStr } = req.body;
   let daysNo = {
     January: 31,
-    Febuary: 29,
+    February: 29,
     March: 31,
     April: 30,
     May: 31,
