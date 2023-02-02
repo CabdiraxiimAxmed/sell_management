@@ -378,7 +378,7 @@ const SupplierInfo: React.FC = () => {
                       <TableCell className='table-cell'>{row.supplier}</TableCell>
                       <TableCell align='right' className='table-cell'>{row.purchase_status ? "true" : 'false'}</TableCell>
                       <TableCell className='table-cell' align="right"> $ {row.total} </TableCell>
-                      <TableCell className='table-cell' align="right"> $ {row.paid} </TableCell>
+                      <TableCell className='table-cell' align="right"> $ {row.paid? row.paid: 0} </TableCell>
                     </TableRow>
                   ))}
               </TableBody>

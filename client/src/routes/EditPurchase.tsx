@@ -104,7 +104,8 @@ const EditPurchase: React.FC = () => {
     let poppedItem: any = items.filter((item: Item) => item.name === name);
     //setSendData({ name: removedItem[0].name, quantity: removedItem[0].itemQuantity, status: 'subtr' });
     setRemovedItems([...removedItems, { name: poppedItem[0].name, quantity: poppedItem[0].itemQuantity }]);
-    setOrder({ ...order, ['items']: [finalItems] })
+    let paid: number  = parseFloat(order.paid) - parseFloat(poppedItem[0].selling_price);
+    setOrder({ ...order, ['items']: [finalItems], paid })
   };
 
   return (
@@ -197,7 +198,7 @@ const EditPurchase: React.FC = () => {
               fullWidth
               required
               name="paid"
-              defaultValue={`${order.paid ? order.paid : 0}`}
+              value={`${order.paid ? order.paid : 0}`}
               multiline
               size="small"
             />
