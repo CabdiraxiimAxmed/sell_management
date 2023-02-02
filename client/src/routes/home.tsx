@@ -56,8 +56,7 @@ const Home: React.FC = () => {
     { supplier: "", initial_amount: "", recorded_date: "" },
   ]);
   const [monthRevenue, setMonthRevenue] = useState<string>(currentMonth);
-  const [monthCustomerDebt, setMonthCustomerDebt] =
-    useState<string>(currentMonth);
+  const [monthCustomerDebt, setMonthCustomerDebt] = useState<string>(currentMonth);
   const [monthSupplierDebt, setMonthSupplierDebt] = useState<string>(currentMonth);
   const [monthExpense, setMonthExpense] = useState<string>(
       `${expenseCurrentMonth < 10 ? '0' + expenseCurrentMonth: expenseCurrentMonth} ${date.getFullYear()}`

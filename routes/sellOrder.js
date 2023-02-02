@@ -108,7 +108,7 @@ router.post('/revenue', async (req, res) => {
 
   let daysNo = {
     '01': 31,
-    '02': 29,
+    '02': 28,
     '03': 31,
     '04': 30,
     '05': 31,
