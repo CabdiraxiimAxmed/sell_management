@@ -105,7 +105,7 @@ router.post('/expense', async (req, res) => {
   let { dateStr } = req.body;
   let daysNo = {
     '01': 31,
-    '02': 29,
+    '02': 28,
     '03': 31,
     '04': 30,
     '05': 31,
@@ -348,7 +348,7 @@ router.post('/monthly/expense', async(req, res) => {
   const { dateStr } = req.body;
   let daysNo = {
     '01': 31,
-    '02': 29,
+    '02': 28,
     '03': 31,
     '04': 30,
     '05': 31,
@@ -376,7 +376,7 @@ router.post('/monthly/expense', async(req, res) => {
       let day = i < 10 ? `0${i}` : i;
       let date = `${splitted[1]}-${splitted[0]}-${day}`;
       labels.push(date);
-      const resp = await client.query(`SELECT * FROM purchase_order WHERE purchase_date='${date}' AND total = paid`);
+      const resp = await client.query(`SELECT * FROM purchase_order WHERE purchase_date='${date}' AND paid > 0`);
       if (resp.rows.length === 0) {
         result.push(0);
         continue
@@ -395,9 +395,10 @@ router.post('/monthly/expense', async(req, res) => {
 
 router.post('/monthly/report', async(req, res) => {
   const { dateStr } = req.body;
+
   let daysNo = {
     '01': 31,
-    '02': 29,
+    '02': 28,
     '03': 31,
     '04': 30,
     '05': 31,

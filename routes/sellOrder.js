@@ -205,33 +205,50 @@ function dateOrdinal(dom) {
 /* This routes is the number of units sold and number of revenue. */
 router.post('/units/report', async (req, res) => {
   /* Change the date */
-  const { date } = req.body;
-  let units = 0;
-  let revenue = 0;
-  try {
-    let items;
-    if (!date) {
-      items = await client.query('SELECT * from sell_order WHERE created_date = CURRENT_DATE');
-    } else {
-      items = await client.query(`SELECT * from sell_order WHERE created_date = '${date}'`);
-    }
-    if (items.rows.length === 0) {
-      units = 0;
-    } else {
-      // suming all the units.
-      for (let order of items.rows) {
-        for (let item of order.items[0]) {
-          units += item.quantity;
-        };
-      }
+  const { dateStr } = req.body;
 
-      // suming all the total of sale orders.
-      for (let order of items.rows) {
-        revenue = Math.round((revenue + parseFloat(order.total)) * 100) / 100;
+  let daysNo = {
+    '01': 31,
+    '02': 28,
+    '03': 31,
+    '04': 30,
+    '05': 31,
+    '06': 30,
+    '07': 31,
+    '08': 31,
+    '09': 30,
+    '10': 31,
+    '11': 30,
+    '12': 31,
+  };
+  try {
+    let units = 0;
+    let revenue = 0;
+    let splitted = dateStr.split(/(\s+)/).filter(function(e) {
+      return e.trim().length > 0;
+    });
+    if (splitted.length < 2 || splitted.length > 2) {
+      res.send('correct');
+      return;
+    }
+    const days = daysNo[splitted[0]];
+    for (let i = 1; i <= days; i++) {
+      let day = i < 10 ? `0${i}` : i;
+      let date = `${splitted[1]}-${splitted[0]}-${day}`;
+      let resp = await client.query(`SELECT * FROM sell_order WHERE created_date = '${date}'`)
+      if(resp.rows.length === 0) continue;
+      for(let order of resp.rows) {
+        let paid = order.paid ? order.paid : 0;
+        revenue = Math.round((revenue + parseFloat(paid))* 100) / 100;
+        for(let item of order.items[0]) {
+          units += item.quantity;
+        }
       }
     }
     res.send({ units, revenue }).end();
+
   } catch (err) {
+    console.log(err);
     res.send('error');
   }
 });
@@ -241,7 +258,7 @@ router.post('/monthly/units_sold', async (req, res) => {
 
   let daysNo = {
     '01': 31,
-    '02': 29,
+    '02': 28,
     '03': 31,
     '04': 30,
     '05': 31,
@@ -282,6 +299,7 @@ router.post('/monthly/units_sold', async (req, res) => {
     }
     res.send({ labels, datasets: [{ label: 'number items sold', data: result, backgroundColor: 'rgba(53, 162, 235, 0.5)' }] });
   } catch (error) {
+    console.log(error);
     res.send('error');
   }
 });
@@ -292,7 +310,7 @@ router.post('/monthly/revenue', async (req, res) => {
 
   let daysNo = {
     '01': 31,
-    '02': 29,
+    '02': 28,
     '03': 31,
     '04': 30,
     '05': 31,
