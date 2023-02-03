@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { data } from '../features/Mock';
 import { Bar } from 'react-chartjs-2';
-import { Paper, Box, TextField, Button } from '@mui/material';
+import { Paper, Box } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import {
@@ -44,10 +44,6 @@ const Report: React.FC = () => {
   const [expenseGotInMonth, setExpenseGotInMonth] = useState<NumberOfUnitsSoldChart[]>();
 
   useEffect(() => {
-    getReports();
-  }, [])
-
-  const getReports = (): void => {
     axios.post('http://localhost:2312/sell/units/report', { dateStr: currentMonthYear })
       .then(resp => {
         if (resp.data === 'error') {
@@ -104,7 +100,8 @@ const Report: React.FC = () => {
       }).catch(error => {
         toast.error(error.message);
       });
-  }
+
+  }, [])
 
   return (
     <>
@@ -132,12 +129,8 @@ const Report: React.FC = () => {
           },
         }}
       >
-        <Paper style={{ padding: '3px', width: '20rem' }}>
-          <p style={{margin: '0px', marginTop: "10px", marginBottom: '3px'}}>This is report is based on:- { currentMonthYear } </p>
-          <TextField  name='date' size='small' label={currentMonthYear} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setCurrentMonthYear(e.target.value);
-          }} />
-          <Button onClick={() => getReports()} style={{ marginTop: '3px' }} variant='contained'>Enter</Button>
+        <Paper style={{ padding: '3pxx', width: '20rem'}}>
+
         </Paper>
         <Paper style={{ padding: '3px' }} elevation={3} >
           <h3>Units Sold </h3>
