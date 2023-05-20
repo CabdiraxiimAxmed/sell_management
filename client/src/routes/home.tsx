@@ -121,7 +121,7 @@ const Home: React.FC = () => {
     let paidAmount: number = parseFloat(paid);
     if (isNaN(totalAmount)) totalAmount = 0;
     if (isNaN(paidAmount)) paidAmount = 0;
-    return totalAmount - paidAmount;
+    return Math.round((totalAmount - paidAmount) * 100) / 100;
   };
 
   const goSellPaper = (id: string) => {
